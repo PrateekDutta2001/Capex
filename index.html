@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapEx Automation - Login</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Ensure background image loads */
+        .login-page {
+            background-image: url('assets/images/bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <h1>CapEx Automation</h1>
+                </div>
+                <p class="subtitle">Capital Expenditure Management System</p>
+            </div>
+            
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <div class="input-group">
+                        <i class="fas fa-user-tag"></i>
+                        <select id="role" name="role" required>
+                            <option value="">Select Role</option>
+                            <option value="requester">Requester</option>
+                            <option value="department_head">Department Head</option>
+                            <option value="plant_head">Plant Head</option>
+                            <option value="business_ceo">Business CEO</option>
+                            <option value="cfo">CFO</option>
+                            <option value="capex_committee">CapEx Committee</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="captcha">Enter the text shown below</label>
+                    <div class="captcha-container">
+                        <div class="captcha-display" id="captchaDisplay"></div>
+                        <button type="button" class="captcha-refresh" id="captchaRefresh" title="Refresh Captcha">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="input-group captcha-input">
+                        <i class="fas fa-shield-alt"></i>
+                        <input type="text" id="captcha" name="captcha" required placeholder="Enter the text above">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <p>Demo Credentials:</p>
+                <div class="demo-credentials">
+                    <div class="credential-item">
+                        <strong>Requester:</strong> john.doe / password123
+                    </div>
+                    <div class="credential-item">
+                        <strong>Department Head:</strong> sarah.wilson / password123
+                    </div>
+                    <div class="credential-item">
+                        <strong>Plant Head:</strong> mike.johnson / password123
+                    </div>
+                    <div class="credential-item">
+                        <strong>Business CEO:</strong> lisa.brown / password123
+                    </div>
+                    <div class="credential-item">
+                        <strong>CFO:</strong> david.garcia / password123
+                    </div>
+                    <div class="credential-item">
+                        <strong>CapEx Committee:</strong> committee.member / password123
+                    </div>
+                    <div class="credential-item">
+                        <strong>Admin:</strong> admin.user / password123
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/auth.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    
+    <script>
+        // Captcha functionality
+        function generateCaptcha() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let captcha = '';
+            for (let i = 0; i < 5; i++) {
+                captcha += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return captcha;
+        }
+        
+        let currentCaptcha = generateCaptcha();
+        document.getElementById('captchaDisplay').textContent = currentCaptcha;
+        
+        document.getElementById('captchaRefresh').addEventListener('click', function() {
+            currentCaptcha = generateCaptcha();
+            document.getElementById('captchaDisplay').textContent = currentCaptcha;
+            document.getElementById('captcha').value = '';
+        });
+        
+        // Remove error notifications
+        document.addEventListener('DOMContentLoaded', function() {
+            // Disable beforeunload warning
+            window.addEventListener('beforeunload', function(e) {
+                e.preventDefault();
+                e.returnValue = '';
+            });
+            
+            // Override error handler
+            window.onerror = function() {
+                return true;
+            };
+            
+            window.addEventListener('unhandledrejection', function() {
+                return true;
+            });
+        });
+        
+        // Validate captcha on form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const captchaInput = document.getElementById('captcha').value.toUpperCase();
+            if (captchaInput !== currentCaptcha) {
+                e.preventDefault();
+                alert('Captcha verification failed. Please try again.');
+                currentCaptcha = generateCaptcha();
+                document.getElementById('captchaDisplay').textContent = currentCaptcha;
+                document.getElementById('captcha').value = '';
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

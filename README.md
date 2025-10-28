@@ -1,139 +1,226 @@
 # CapEx Automation Application
 
-## 1. Overview
 A comprehensive Capital Expenditure automation application that digitizes the entire CapEx requisition process from form submission to final approval, with role-based access control and automated approval workflows.
 
-## 2. User Roles & Permissions
+## Features
 
-### 2.1 User Roles
-1. **Requester** - Plant-level users who initiate CapEx requests
-2. **Department Head** - First level approval authority
-3. **Plant Head** - Second level approval authority  
-4. **Business CEO** - Third level approval authority
-5. **CFO** - Final approval authority
-6. **CapEx Committee** - Special approval for requests > 25 lakhs
-7. **Admin** - System administration and configuration
+### 🔐 Role-Based Authentication
+- **Requester**: Create and view own CapEx requests
+- **Department Head**: First level approval authority
+- **Plant Head**: Second level approval authority
+- **Business CEO**: Third level approval authority
+- **CFO**: Final approval authority
+- **CapEx Committee**: Special approval for requests > 25 lakhs
+- **Admin**: System administration and configuration
 
-### 2.2 Role Permissions
-- **Requester**: Create, view own requests, attach documents
-- **Department Head**: Approve/reject requests from their department
-- **Plant Head**: Approve/reject requests from their plant
-- **Business CEO**: Approve/reject requests from their business unit
-- **CFO**: Final approval authority for all requests
-- **CapEx Committee**: Review and approve requests > 25 lakhs
-- **Admin**: Manage users, configure workflows, view all data
+### 📋 CapEx Request Management
+- Create new CapEx requests with detailed information
+- Upload supporting documents
+- Track request status in real-time
+- View comprehensive request details
+- Business justification and expected delivery dates
 
-## 3. CapEx Types & Approval Thresholds
-
-### 3.1 CapEx Types
-1. **Revenue Growth CapEx** - Investments for business expansion
-2. **Maintenance CapEx** - Equipment maintenance and replacement
-
-### 3.2 Approval Thresholds
+### ✅ Approval Workflow
 - **Standard Process** (< 25 lakhs): Requester → Department Head → Plant Head → Business CEO → CFO
 - **Committee Process** (≥ 25 lakhs): Requester → Department Head → Plant Head → CapEx Committee → Business CEO → CFO
+- Real-time approval tracking
+- Comments and feedback at each approval level
 
-## 4. Application Architecture
-
-### 4.1 Frontend Components
-- **Login System** - Role-based authentication
-- **Dashboard** - Role-specific overview and pending actions
-- **CapEx Form** - Dynamic form with validation
-- **Approval Interface** - Streamlined approval/rejection workflow
-- **Document Management** - File upload and viewing
-- **Reporting Dashboard** - Status tracking and analytics
-
-### 4.2 Data Flow
-1. **Request Creation** → Form validation → Document attachment
-2. **Workflow Routing** → Automatic routing based on amount and type
-3. **Approval Chain** → Sequential approvals with notifications
-4. **Status Updates** → Real-time status tracking
-5. **WBS/AUC Generation** → Automatic code generation post-approval
-6. **PO Release** → Integration point for procurement
-
-## 5. Key Features
-
-### 5.1 Core Functionality
-- Multi-step approval workflow
-- Document attachment and management
-- Real-time status tracking
-- Role-based dashboards
+### 📊 Dashboard & Analytics
+- Role-specific dashboards
+- Real-time statistics and metrics
 - Comprehensive reporting
-- Mobile-responsive design
+- Department-wise analysis
+- Amount analysis and trends
 
-### 5.2 Advanced Features
-- Automatic routing based on amount thresholds
-- Email notifications (future integration)
-- SAP integration points (future)
-- Power BI dashboard integration (future)
-- Audit trail and compliance tracking
+### 🔔 Notifications
+- Real-time notifications for pending approvals
+- Status updates and alerts
+- Email integration ready (future enhancement)
 
-## 6. Technical Implementation
+## Getting Started
 
-### 6.1 Technology Stack
+### Prerequisites
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- No additional software installation required
+
+### Installation
+1. Download or clone the application files
+2. Open `index.html` in your web browser
+3. The application will run locally without any server setup
+
+### Demo Credentials
+
+| Role | Username | Password |
+|------|----------|----------|
+| Requester | john.doe | password123 |
+| Department Head | sarah.wilson | password123 |
+| Plant Head | mike.johnson | password123 |
+| Business CEO | lisa.brown | password123 |
+| CFO | david.garcia | password123 |
+| CapEx Committee | committee.member | password123 |
+| Admin | admin.user | password123 |
+
+## Usage Guide
+
+### 1. Login
+- Open the application in your browser
+- Select your role from the dropdown
+- Enter your username and password
+- Enter the captcha text shown (case-insensitive)
+- Click the refresh icon to get a new captcha if needed
+- Click "Login" to access the dashboard
+
+### 2. Creating a CapEx Request (Requester)
+1. Navigate to "Create Request" from the sidebar
+2. Fill out the CapEx request form:
+   - Request Title
+   - CapEx Type (Revenue Growth or Maintenance)
+   - Description
+   - Amount in INR
+   - Expected Delivery Date
+   - Business Justification
+   - Supporting Documents (optional)
+3. Click "Submit Request"
+4. The request will be routed to the appropriate approval chain
+
+### 3. Approving Requests (Approvers)
+1. Navigate to "Pending Approvals" from the sidebar
+2. Review the request details
+3. Click "Approve" or "Reject"
+4. Add comments if rejecting
+5. The request will move to the next approval level
+
+### 4. Viewing Reports (Authorized Users)
+1. Navigate to "Reports" from the sidebar
+2. View comprehensive analytics including:
+   - Request summary statistics
+   - Amount analysis
+   - Type distribution
+   - Department analysis
+
+### 5. Admin Functions (Admin Users)
+1. Navigate to "Admin" from the sidebar
+2. Access system administration features:
+   - User management
+   - System settings
+   - Data export
+
+## Sample Data
+
+The application includes comprehensive sample data:
+
+### CapEx Requests
+- **CAPEX-2024-001**: New Production Line Equipment (₹45,00,000) - Pending Department Head approval
+- **CAPEX-2024-002**: HVAC System Replacement (₹18,00,000) - Fully approved
+- **CAPEX-2024-003**: Quality Control Equipment Upgrade (₹12,00,000) - Rejected by Plant Head
+- **CAPEX-2024-004**: IT Infrastructure Upgrade (₹32,00,000) - Pending CapEx Committee approval
+- **CAPEX-2024-005**: Safety Equipment Installation (₹8,50,000) - Pending Department Head approval
+- **CAPEX-2024-006**: Warehouse Automation System (₹68,00,000) - Pending CapEx Committee approval
+
+### Approval Scenarios
+- **Standard Process**: Requests below ₹25,00,000 follow the standard approval chain
+- **Committee Process**: Requests above ₹25,00,000 require CapEx Committee review
+- **Different Statuses**: Pending, Approved, Rejected, In Progress
+
+## Technical Details
+
+### Technology Stack
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
 - **Styling**: Modern CSS with responsive design
 - **Data Storage**: Local Storage for demo purposes
 - **Architecture**: Single Page Application (SPA)
 
-### 6.2 File Structure
+### File Structure
 ```
 CapEx/
-├── index.html (Login page)
-├── dashboard.html (Main dashboard)
-├── request-form.html (CapEx request form)
-├── approval.html (Approval interface)
-├── reports.html (Reporting dashboard)
+├── index.html              # Login page with captcha
+├── dashboard.html          # Main dashboard
+├── request-form.html       # CapEx request form
+├── my-requests.html        # My requests list
+├── approval.html           # Approval interface
+├── reports.html            # Reports & analytics
 ├── css/
-│   ├── main.css
-│   ├── components.css
-│   └── responsive.css
+│   ├── main.css           # Core styles
+│   ├── components.css     # Component styles
+│   └── responsive.css     # Responsive design
 ├── js/
-│   ├── app.js (Main application logic)
-│   ├── auth.js (Authentication)
-│   ├── workflow.js (Approval workflow)
-│   └── data.js (Sample data)
+│   ├── app.js             # Main application logic
+│   ├── auth.js            # Authentication
+│   ├── workflow.js        # Approval workflow
+│   └── data.js            # Sample data
 └── assets/
     └── images/
+        └── bg.png         # Background image for login
 ```
 
-## 7. Sample Data Structure
+### Key Features
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Real-time Updates**: Dashboard updates automatically
+- **Form Validation**: Client-side validation with error messages
+- **File Upload**: Drag-and-drop file upload interface
+- **Search & Filter**: Advanced filtering capabilities
+- **Export Functionality**: Data export in JSON format
+- **Accessibility**: Keyboard navigation and screen reader support
 
-### 7.1 Users
-- Multiple users for each role
-- Different departments and plants
-- Various business units
+## Future Enhancements
 
-### 7.2 CapEx Requests
-- Requests below 25 lakhs (standard process)
-- Requests above 25 lakhs (committee process)
-- Different CapEx types (Revenue Growth vs Maintenance)
-- Various statuses (Pending, Approved, Rejected, etc.)
+### Planned Features
+- **Email Notifications**: Automated email alerts for approvals
+- **SAP Integration**: WBS/AUC code generation and PO release
+- **Power BI Dashboard**: Advanced analytics and reporting
+- **Mobile Application**: Native mobile app for iOS and Android
+- **Document Management**: Advanced document version control
+- **Multi-language Support**: Internationalization support
+- **Advanced Reporting**: Custom report builder
+- **Workflow Customization**: Configurable approval workflows
 
-### 7.3 Approval Chains
-- Complete approval workflows
-- Different routing scenarios
-- Status tracking at each level
+### Integration Points
+- **SAP ERP**: For WBS/AUC code generation and PO management
+- **Email Systems**: For notification delivery
+- **Document Management**: For file storage and version control
+- **Business Intelligence**: For advanced analytics
 
-## 8. User Experience Design
+## Browser Compatibility
 
-### 8.1 Design Principles
-- **Simplicity**: Easy-to-use interface for plant-level users
-- **Efficiency**: Streamlined approval process
-- **Transparency**: Clear status tracking and visibility
-- **Accessibility**: Mobile-responsive design
-- **Intuitive**: Role-based navigation and workflows
+- **Chrome**: 80+
+- **Firefox**: 75+
+- **Safari**: 13+
+- **Edge**: 80+
 
-### 8.2 Key User Journeys
-1. **Requester Journey**: Login → Create Request → Attach Documents → Submit → Track Status
-2. **Approver Journey**: Login → View Pending Approvals → Review Details → Approve/Reject → Add Comments
-3. **Admin Journey**: Login → Manage Users → Configure Settings → View Reports
+## Support
 
-## 9. Future Enhancements
-- Email notification system
-- SAP integration for WBS/AUC codes
-- Power BI dashboard integration
-- Mobile application
-- Advanced reporting and analytics
-- Document version control
-- Multi-language support
+For technical support or questions about the application, please contact the development team.
+
+## License
+
+This application is developed for internal use. All rights reserved.
+
+---
+
+**Version**: 1.1.0  
+**Last Updated**: January 2024  
+**Developer**: CapEx Automation Team
+
+## Recent Updates (v1.1.0)
+
+### Security Enhancements
+- ✅ Added CAPTCHA verification on login page
+- ✅ Implemented case-insensitive captcha validation
+- ✅ Added refresh functionality for captcha
+
+### UI Improvements
+- ✅ Fixed login page background image display
+- ✅ Resolved icon overlapping with text in login fields
+- ✅ Applied dark theme to all form elements
+- ✅ Enhanced search and filter input styling
+- ✅ Improved form container backgrounds and borders
+
+### Bug Fixes
+- ✅ Removed unwanted "Changes you made may not be saved" warnings
+- ✅ Disabled error notification popups on page load
+- ✅ Cleaned up test files and unwanted code
+
+### New Pages
+- ✅ Created standalone pages: request-form.html, my-requests.html, approval.html, reports.html
+- ✅ Integrated all pages with proper navigation

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapEx Automation - My Requests</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="dashboard-page">
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span>CapEx Automation</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role" id="userRole">Loading...</div>
+                    </div>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="request-form.html" class="nav-link">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>New Request</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="my-requests.html" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>My Requests</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="pendingApprovalsNav">
+                        <a href="approval.html" class="nav-link">
+                            <i class="fas fa-clock"></i>
+                            <span>Pending Approvals</span>
+                            <span class="badge" id="pendingCount">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="reportsNav">
+                        <a href="reports.html" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>View Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <button class="btn btn-secondary btn-sm" id="profileBtn">
+                    <i class="fas fa-user-cog"></i>
+                    Profile
+                </button>
+                <button class="btn btn-secondary" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">My CapEx Requests</h1>
+                </div>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <button class="user-menu-btn" id="userMenuBtn">
+                            <div class="user-avatar-small">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span id="userNameHeader">Loading...</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="dropdown-item" onclick="window.location.href='profile.html'">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </div>
+                            <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item" onclick="authManager.logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="requests-container">
+                    <div class="requests-header">
+                        <h2>My CapEx Requests</h2>
+                        <div class="requests-actions">
+                            <button class="btn btn-primary" onclick="window.location.href='request-form.html'">
+                                <i class="fas fa-plus"></i> New Request
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="requests-filters">
+                        <div class="search-filter-bar">
+                            <div class="search-input">
+                                <input type="text" id="requestSearch" placeholder="Search requests...">
+                            </div>
+                            <select id="statusFilter" class="filter-select">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="in_progress">In Progress</option>
+                            </select>
+                            <select id="typeFilter" class="filter-select">
+                                <option value="">All Types</option>
+                                <option value="revenue_growth">Revenue Growth</option>
+                                <option value="maintenance">Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="requests-table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Request ID</th>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="requestsTableBody">
+                                <!-- Requests will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/workflow.js"></script>
+    <script src="js/app.js"></script>
+    
+    <script>
+        // Check authentication
+        if (!authManager.isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
+        
+        // Update user interface
+        updateUserInterface();
+        
+        // Load my requests
+        function loadMyRequests() {
+            const requestsTableBody = document.getElementById('requestsTableBody');
+            const myRequests = authManager.getMyRequests();
+            
+            if (myRequests.length === 0) {
+                requestsTableBody.innerHTML = '<tr><td colspan="7" class="text-center">No requests found. <a href="request-form.html">Create your first request</a></td></tr>';
+                return;
+            }
+            
+            requestsTableBody.innerHTML = myRequests.map(request => `
+                <tr>
+                    <td>${request.id}</td>
+                    <td>${request.title}</td>
+                    <td>${capexTypes.find(t => t.id === request.type)?.name || request.type}</td>
+                    <td>${formatCurrency(request.amount)}</td>
+                    <td>
+                        <div class="status status-${request.status}">
+                            <i class="fas fa-circle"></i>
+                            ${statusDefinitions[request.status].label}
+                        </div>
+                    </td>
+                    <td>${formatDate(request.createdAt)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="viewRequestDetails('${request.id}')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function viewRequestDetails(requestId) {
+            const request = capexRequests.find(r => r.id === requestId);
+            if (!request) return;
+            
+            // Create modal for request details
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 800px;">
+                    <div class="modal-header">
+                        <h3>Request Details - ${request.id}</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="request-details">
+                            <div class="detail-section">
+                                <h4>Basic Information</h4>
+                                <div class="detail-grid">
+                                    <div class="detail-item">
+                                        <label>Title:</label>
+                                        <span>${request.title}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Type:</label>
+                                        <span>${capexTypes.find(t => t.id === request.type)?.name || request.type}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Amount:</label>
+                                        <span>${formatCurrency(request.amount)}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Status:</label>
+                                        <span class="status status-${request.status}">
+                                            ${statusDefinitions[request.status].label}
+                                        </span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Expected Delivery:</label>
+                                        <span>${request.expectedDelivery ? formatDate(request.expectedDelivery) : 'Not specified'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h4>Description</h4>
+                                <p>${request.description}</p>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h4>Business Justification</h4>
+                                <p>${request.justification}</p>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h4>Approval Chain</h4>
+                                <div class="approval-chain">
+                                    ${request.approvalChain.map(approval => `
+                                        <div class="approval-step ${approval.status}">
+                                            <div class="step-icon">
+                                                <i class="fas fa-${approval.status === 'approved' ? 'check' : approval.status === 'rejected' ? 'times' : 'clock'}"></i>
+                                            </div>
+                                            <div class="step-info">
+                                                <div class="step-title">${roleDefinitions[approval.level]?.label || approval.level}</div>
+                                                <div class="step-user">${approval.userName || 'Pending'}</div>
+                                                <div class="step-time">${approval.timestamp ? formatDate(approval.timestamp) : 'Pending'}</div>
+                                                ${approval.comments ? `<div class="step-comments">${approval.comments}</div>` : ''}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            
+                            ${request.wbsCode || request.aucCode ? `
+                                <div class="detail-section">
+                                    <h4>Approval Codes</h4>
+                                    <div class="detail-grid">
+                                        ${request.wbsCode ? `<div class="detail-item"><label>WBS Code:</label><span>${request.wbsCode}</span></div>` : ''}
+                                        ${request.aucCode ? `<div class="detail-item"><label>AUC Code:</label><span>${request.aucCode}</span></div>` : ''}
+                                        ${request.poNumber ? `<div class="detail-item"><label>PO Number:</label><span>${request.poNumber}</span></div>` : ''}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Filter requests
+        document.getElementById('requestSearch').addEventListener('input', filterRequests);
+        document.getElementById('statusFilter').addEventListener('change', filterRequests);
+        document.getElementById('typeFilter').addEventListener('change', filterRequests);
+        
+        function filterRequests() {
+            const searchTerm = document.getElementById('requestSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            
+            const myRequests = authManager.getMyRequests();
+            const filteredRequests = myRequests.filter(request => {
+                const matchesSearch = request.title.toLowerCase().includes(searchTerm) || 
+                                    request.id.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || request.status === statusFilter;
+                const matchesType = !typeFilter || request.type === typeFilter;
+                
+                return matchesSearch && matchesStatus && matchesType;
+            });
+            
+            const requestsTableBody = document.getElementById('requestsTableBody');
+            
+            if (filteredRequests.length === 0) {
+                requestsTableBody.innerHTML = '<tr><td colspan="7" class="text-center">No requests match your filters.</td></tr>';
+                return;
+            }
+            
+            requestsTableBody.innerHTML = filteredRequests.map(request => `
+                <tr>
+                    <td>${request.id}</td>
+                    <td>${request.title}</td>
+                    <td>${capexTypes.find(t => t.id === request.type)?.name || request.type}</td>
+                    <td>${formatCurrency(request.amount)}</td>
+                    <td>
+                        <div class="status status-${request.status}">
+                            <i class="fas fa-circle"></i>
+                            ${statusDefinitions[request.status].label}
+                        </div>
+                    </td>
+                    <td>${formatDate(request.createdAt)}</td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="viewRequestDetails('${request.id}')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+        
+        // Setup sidebar toggle
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', () => {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('collapsed');
+            });
+        }
+        
+        // Setup mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('show');
+            });
+        }
+        
+        // Setup user menu dropdown
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        if (userMenuBtn && userDropdown) {
+            userMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', () => {
+                userDropdown.classList.remove('show');
+            });
+        }
+        
+        // Logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to logout?')) {
+                    authManager.logout();
+                }
+            });
+        }
+        
+        // Load requests on page load
+        loadMyRequests();
+    </script>
+</body>
+</html>
+

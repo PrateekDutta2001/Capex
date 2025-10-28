@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapEx Automation - Create Request</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="dashboard-page">
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span>CapEx Automation</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role" id="userRole">Loading...</div>
+                    </div>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="request-form.html" class="nav-link">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>New Request</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="my-requests.html" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>My Requests</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="pendingApprovalsNav">
+                        <a href="approval.html" class="nav-link">
+                            <i class="fas fa-clock"></i>
+                            <span>Pending Approvals</span>
+                            <span class="badge" id="pendingCount">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="reportsNav">
+                        <a href="reports.html" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>View Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <button class="btn btn-secondary btn-sm" id="profileBtn">
+                    <i class="fas fa-user-cog"></i>
+                    Profile
+                </button>
+                <button class="btn btn-secondary" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Create CapEx Request</h1>
+                </div>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <button class="user-menu-btn" id="userMenuBtn">
+                            <div class="user-avatar-small">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span id="userNameHeader">Loading...</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="dropdown-item" onclick="window.location.href='profile.html'">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </div>
+                            <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item" onclick="authManager.logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2>Create New CapEx Request</h2>
+                        <p>Fill out the form below to submit a new Capital Expenditure request</p>
+                    </div>
+                    
+                    <form id="capexRequestForm" class="capex-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="requestTitle">Request Title *</label>
+                                <input type="text" id="requestTitle" name="title" required placeholder="Enter request title">
+                            </div>
+                            <div class="form-group">
+                                <label for="requestType">CapEx Type *</label>
+                                <select id="requestType" name="type" required>
+                                    <option value="">Select CapEx Type</option>
+                                    <option value="revenue_growth">Revenue Growth CapEx</option>
+                                    <option value="maintenance">Maintenance CapEx</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="requestDescription">Description *</label>
+                            <textarea id="requestDescription" name="description" required placeholder="Describe the CapEx request in detail" rows="5"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="requestAmount">Amount (INR) *</label>
+                                <input type="number" id="requestAmount" name="amount" required placeholder="Enter amount in INR" min="1" step="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="expectedDelivery">Expected Delivery Date</label>
+                                <input type="date" id="expectedDelivery" name="expectedDelivery">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="justification">Business Justification *</label>
+                            <textarea id="justification" name="justification" required placeholder="Explain the business need and expected benefits" rows="5"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="documentUpload">Supporting Documents</label>
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Drag and drop files here or click to browse</p>
+                                <p class="file-hint">Accepted formats: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (Max 10MB per file)</p>
+                                <input type="file" id="documentUpload" name="documents" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="file-list" id="fileList"></div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="window.location.href='dashboard.html'">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Submit Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/data.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/workflow.js"></script>
+    <script src="js/app.js"></script>
+    
+    <script>
+        // Check authentication
+        if (!authManager.isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
+        
+        // Update user interface
+        updateUserInterface();
+        
+        // Handle form submission
+        const form = document.getElementById('capexRequestForm');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('documentUpload');
+        const fileList = document.getElementById('fileList');
+        
+        let selectedFiles = [];
+        
+        // File upload handling
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+        
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('drag-over');
+        });
+        
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('drag-over');
+        });
+        
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('drag-over');
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+        
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (file.size > 10 * 1024 * 1024) {
+                    showMessage(`File ${file.name} is too large. Maximum size is 10MB.`, 'error');
+                    return;
+                }
+                selectedFiles.push(file);
+                addFileToList(file);
+            });
+        }
+        
+        function addFileToList(file) {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.innerHTML = `
+                <div class="file-info">
+                    <i class="fas fa-file"></i>
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">${formatFileSize(file.size)}</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-error" onclick="removeFile('${file.name}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            fileList.appendChild(fileItem);
+        }
+        
+        function removeFile(fileName) {
+            selectedFiles = selectedFiles.filter(f => f.name !== fileName);
+            fileList.innerHTML = '';
+            selectedFiles.forEach(addFileToList);
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const currentUser = authManager.getCurrentUser();
+            if (!currentUser) {
+                showMessage('User not authenticated', 'error');
+                return;
+            }
+            
+            const formData = new FormData(form);
+            
+            const requestData = {
+                id: 'CAPEX-2024-' + String(capexRequests.length + 1).padStart(3, '0'),
+                title: formData.get('title'),
+                description: formData.get('description'),
+                type: formData.get('type'),
+                amount: parseFloat(formData.get('amount')),
+                currency: 'INR',
+                department: currentUser.department,
+                plant: currentUser.plant,
+                businessUnit: currentUser.businessUnit,
+                requesterId: currentUser.id,
+                requesterName: currentUser.name,
+                status: 'pending',
+                currentApprover: 'department_head',
+                documents: [],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                expectedDelivery: formData.get('expectedDelivery'),
+                justification: formData.get('justification'),
+                wbsCode: null,
+                aucCode: null,
+                poNumber: null
+            };
+            
+            // Add documents
+            selectedFiles.forEach((file, index) => {
+                requestData.documents.push({
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    uploadedAt: new Date().toISOString()
+                });
+            });
+            
+            // Setup approval chain
+            requestData.approvalChain = [
+                {
+                    level: 'requester',
+                    userId: currentUser.id,
+                    userName: currentUser.name,
+                    status: 'approved',
+                    timestamp: new Date().toISOString(),
+                    comments: 'Request submitted'
+                }
+            ];
+            
+            // Add approval chain based on amount
+            if (requestData.amount >= approvalThresholds.committeeReview) {
+                requestData.approvalChain.push(
+                    { level: 'department_head', userId: null, userName: '', status: 'pending', timestamp: null, comments: '' },
+                    { level: 'plant_head', userId: null, userName: '', status: 'pending', timestamp: null, comments: '' },
+                    { level: 'capex_committee', userId: null, userName: '', status: 'pending', timestamp: null, comments: '' },
+                    { level: 'business_ceo', userId: null, userName: '', status: 'pending', timestamp: null, comments: '' },
+                    { level: 'cfo', userId: null, userName: '', status: 'pending', timestamp: null, comments: '' }
+                );
+            } else {
+                requestData.approvalChain.push(
+                    { level: 'department_head', userId: null, userName: '', status: 'pending', timestamp: null, comments: '' },
+                    { level: 'plant_head', userId: null, userName: '', status: 'pending', timestamp: null, comments: '' },
+                    { level: 'business_ceo', userId: null, userName: '', status: 'pending', timestamp: null, comments: '' },
+                    { level: 'cfo', userId: null, userName: '', status: 'pending', timestamp: null, comments: '' }
+                );
+            }
+            
+            // Add to requests array
+            capexRequests.push(requestData);
+            
+            // Update localStorage
+            localStorage.setItem('capex_requests', JSON.stringify(capexRequests));
+            
+            showMessage('CapEx request submitted successfully!', 'success');
+            
+            // Navigate back to dashboard after 1.5 seconds
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        });
+        
+        // Setup sidebar toggle
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', () => {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('collapsed');
+            });
+        }
+        
+        // Setup mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('show');
+            });
+        }
+        
+        // Setup user menu dropdown
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        if (userMenuBtn && userDropdown) {
+            userMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', () => {
+                userDropdown.classList.remove('show');
+            });
+        }
+        
+        // Logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to logout?')) {
+                    authManager.logout();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
