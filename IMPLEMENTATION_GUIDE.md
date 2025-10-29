@@ -1,279 +1,310 @@
-# CapEx Automation Application - Implementation Guide
+# CapEx Portal - Implementation Guide
 
 ## Overview
-The CapEx Automation Application has been completed with separate HTML pages for better organization and easier navigation. All files are created and integrated according to the system design.
+This guide provides complete instructions for implementing and deploying the CapEx Portal application with MySQL database integration.
 
-## Application Structure
+## Prerequisites
 
+### For Current Implementation (Client-Side Only)
+- Modern web browser (Chrome 80+, Firefox 75+, Safari 13+, Edge 80+)
+- No server required
+- Just open `index.html` in browser
+
+### For Database Integration (Future)
+- MySQL 8.0 or higher
+- Web server (Apache/Nginx)
+- PHP 8.0+ or Node.js 16+ (for backend API)
+- phpMyAdmin or MySQL Workbench
+
+## Installation
+
+### Step 1: Extract Files
 ```
-CapEx/
-├── index.html (Login page)
-├── dashboard.html (Main dashboard)
-├── request-form.html (CapEx request creation form)
-├── approval.html (Approval interface)
-├── reports.html (Reporting dashboard)
-├── my-requests.html (My requests list)
-├── css/
-│   ├── main.css
-│   ├── components.css
-│   └── responsive.css
-├── js/
-│   ├── app.js (Main application logic)
-│   ├── auth.js (Authentication)
-│   ├── workflow.js (Approval workflow)
-│   └── data.js (Sample data)
-└── assets/
-    └── images/
-        └── bg.png (Background image)
+1. Extract all files to your web directory
+2. Ensure all folders (css, js, assets, database) are in place
+3. Open index.html in your browser
 ```
 
-## Files Created/Updated
+### Step 2: Database Setup (For Future Backend)
+```bash
+# Connect to MySQL
+mysql -u root -p
 
-### 1. **index.html** (Login Page)
-- Login form with username, password, and role selection
-- Background image integration (fixed)
-- Demo credentials displayed on login page
-- Redirects to dashboard.html after successful login
+# Run the schema file
+source database/capex_database.sql
 
-### 2. **dashboard.html** (Main Dashboard)
-- **Updated** to link to separate pages instead of sections
-- Dashboard with statistics cards
-- Recent requests list
-- Pending approvals preview
-- Quick action buttons
-- Approval workflow diagram
+# Verify tables
+SHOW TABLES;
+```
 
-### 3. **request-form.html** (NEW - CapEx Request Form)
-- Complete form for creating new CapEx requests
-- Fields include:
-  - Request title
-  - CapEx type (Revenue Growth/Maintenance)
-  - Description
-  - Amount in INR
-  - Expected delivery date
-  - Business justification
-  - Document upload with drag-and-drop support
-- Form validation and submission
-- Redirects to dashboard after successful submission
-- Approval chain auto-configured based on amount (25 lakhs threshold)
+## Configuration
 
-### 4. **my-requests.html** (NEW - My Requests)
-- List of all requests created by the current user
-- Search functionality
-- Filter by status (All, Pending, Approved, Rejected, In Progress)
-- Filter by type (Revenue Growth, Maintenance)
-- Table view with sortable columns
-- View details modal with complete request information
-- Approval chain visualization
+### Current Configuration (LocalStorage)
+The application currently uses localStorage for data persistence. All data is automatically synced across:
+- All pages
+- All browser tabs
+- Page reloads
 
-### 5. **approval.html** (NEW - Pending Approvals)
-- List of requests pending approval for current user
-- Approve/Reject buttons with optional comments
-- Detailed request view
-- Document download capability
-- Real-time status updates
-- Shows approval chain progress
+### Data Synchronization
+- **Auto-save**: All changes saved to localStorage immediately
+- **Cross-tab Sync**: Opens in multiple tabs sync automatically
+- **30-second Auto-refresh**: Dashboard updates every 30 seconds
+- **Manual Sync**: Call `dataSyncManager.forceSync()` to refresh
 
-### 6. **reports.html** (NEW - Reports & Analytics)
-- Request summary statistics
-- Amount analysis (total, average, highest)
-- Type distribution chart
-- Department-wise analysis
-- Recent requests table
-- Export data functionality (JSON download)
+## Usage
 
-## Integration Points
+### Login Credentials
+```
+Requester: john.doe / password123
+Department Head: sarah.wilson / password123
+Plant Head: mike.johnson / password123
+Business CEO: lisa.brown / password123
+CFO: david.garcia / password123
+CapEx Committee: committee.member / password123
+Admin: admin.user / password123
+```
 
-### Navigation Flow
-1. **Login** (index.html) → **Dashboard** (dashboard.html)
-2. **Dashboard** → **New Request** (request-form.html)
-3. **Dashboard** → **My Requests** (my-requests.html)
-4. **Dashboard** → **Pending Approvals** (approval.html)
-5. **Dashboard** → **Reports** (reports.html)
+### Creating a Request
+1. Login as requester
+2. Click "New Request" or go to request-form.html
+3. Fill all required fields (marked with *)
+4. Select project types and support documents
+5. Enter economic evaluation details
+6. Upload documents (optional)
+7. Click "Submit Request"
+8. Request routed to Department Head
 
-### Authentication
-- All pages (except index.html) check for authentication
-- Unauthenticated users are redirected to login page
-- Session management with 8-hour timeout
-- Role-based access control
+### Approving Requests
+1. Login as approver
+2. Click "Pending Approvals"
+3. Review request details
+4. Click "Approve" or "Reject"
+5. Add comment in modal dialog
+6. Submit - request moves to next level
 
-### Data Persistence
-- Uses localStorage for request data
-- Automatically saves to localStorage on submission
-- Loads from localStorage on page load
-- Sample data provided for demo purposes
+### Admin Functions
+1. Login as admin
+2. Click "Admin" in sidebar
+3. View charts:
+   - Requests by Status (Pie)
+   - Requests by Type (Bar)
+   - Amount Trend (Line)
+   - Department Distribution (Doughnut)
+4. Export data or refresh statistics
 
-## Features by Page
+## Features
 
-### request-form.html
-- Complete CapEx request creation form
-- Drag-and-drop file upload
-- Multiple file support
-- File size validation (10MB max per file)
-- Real-time file list preview
-- Form validation
-- Auto-approval chain configuration
+### Enhanced Request Form
+Based on real CapEx PDF forms, includes:
+- **Basic Info**: Location, Department, Financial Year, Dates
+- **Project Type**: 8 checkbox options
+- **Description**: Current Process, Project Description, Justification
+- **Support**: 12 document type options
+- **Economic**: Amount, Machinery, Installation, Payback, NPV
 
-### my-requests.html
-- Display all user's requests
-- Search by title or ID
-- Filter by status and type
-- View detailed request information
-- Approval chain visualization
-- WBS/AUC/PO codes display (if approved)
+### Approval Workflow
+```
+Amount < ₹25 Lakhs:
+Requester → Department Head → Plant Head → Business CEO → CFO
 
-### approval.html
-- List pending approvals for current user
-- Approve with optional comment
-- Reject with required reason
-- View full request details
-- Download documents
-- Real-time status updates
+Amount ≥ ₹25 Lakhs:
+Requester → Department Head → Plant Head → CapEx Committee → Business CEO → CFO
+```
 
-### reports.html
-- Comprehensive statistics
-- Amount analysis
-- Type and department breakdown
-- Recent requests table
+### Tile-Style Request Viewing
+- Professional card layout
+- Inline actions (View Details, Track)
+- Search and filter
+- Status indicators
+
+### Admin Dashboard
+- Statistical overview cards
+- 4 chart types with Chart.js
+- Real-time data
 - Export functionality
 
-## How to Use
+### Sidebar Navigation
+- Collapsible (click three-line icon)
+- Role-based menu visibility
+- Badge notifications
+- Profile and logout buttons
 
-### As a Requester
-1. Login with `john.doe / password123`
-2. Click "New Request" to create a CapEx request
-3. Fill out the form completely
-4. Upload supporting documents
-5. Click "Submit Request"
-6. View your requests in "My Requests"
-7. Track approval status and history
+## Data Synchronization
 
-### As an Approver (Department Head, Plant Head, CEO, CFO)
-1. Login with appropriate credentials
-2. Go to "Pending Approvals"
-3. Review request details
-4. Click "Approve" or "Reject" button
-5. Add comments if needed
-6. View approval history
+### Current Implementation
+```
+localStorage
+├── capex_requests      # All CapEx requests
+├── capex_users        # User data
+├── capex_notifications # User notifications
+└── capex_current_user  # Current session
+```
 
-### As an Admin
-1. Login with `admin.user / password123`
-2. Access all sections
-3. View reports and analytics
-4. Export data
-5. Manage system settings
+### Automatic Sync
+- Auto-save on create/update/delete
+- Storage event listeners for multi-tab sync
+- 30-second refresh interval
+- Force sync capability
 
-## Key Functions
+### Manual Sync
+```javascript
+// Force refresh data
+dataSyncManager.forceSync();
 
-### Authentication (auth.js)
-- `authManager.login()` - User authentication
-- `authManager.logout()` - User logout
-- `authManager.getCurrentUser()` - Get current user
-- `authManager.getPendingApprovals()` - Get pending approvals
-- `authManager.getMyRequests()` - Get user's requests
-- `updateUserInterface()` - Update UI with user data
+// Update request
+dataSyncManager.updateRequest(id, {status: 'approved'});
 
-### Workflow (workflow.js)
-- `approveRequest()` - Approve a request
-- `rejectRequest()` - Reject a request
-- `viewRequestDetails()` - View request details modal
-- `formatCurrency()` - Format currency display
-- `formatDate()` - Format date display
+// Get statistics
+const stats = dataSyncManager.getStatistics();
+```
 
-### Utilities (app.js)
-- `showMessage()` - Display notification messages
-- `formatFileSize()` - Format file size display
-- Global event handlers
-- Form validation
+## Database Integration (Future)
 
-## Demo Credentials
+### API Endpoints Needed
+```
+POST   /api/login
+POST   /api/logout
+GET    /api/user/me
+GET    /api/requests
+POST   /api/requests
+GET    /api/requests/:id
+PUT    /api/requests/:id
+DELETE /api/requests/:id
+POST   /api/requests/:id/approve
+POST   /api/requests/:id/reject
+GET    /api/pending-approvals
+GET    /api/notifications
+PUT    /api/notifications/:id/read
+GET    /api/stats
+```
 
-| Role | Username | Password |
-|------|----------|----------|
-| Requester | john.doe | password123 |
-| Department Head | sarah.wilson | password123 |
-| Plant Head | mike.johnson | password123 |
-| Business CEO | lisa.brown | password123 |
-| CFO | david.garcia | password123 |
-| CapEx Committee | committee.member | password123 |
-| Admin | admin.user | password123 |
+### Using Stored Procedures
+```sql
+-- Create request
+CALL sp_create_capex_request(
+    'CAPEX-2024-011',
+    'New Equipment',
+    1500000,
+    1,
+    'John Doe',
+    'Production',
+    'Plant A'
+);
 
-## Testing Checklist
+-- Approve request
+CALL sp_approve_request(
+    'CAPEX-2024-011',
+    2,
+    'Sarah Wilson',
+    'Approved - Good proposal'
+);
+```
 
-### Login Flow
-- [ ] Login with valid credentials
-- [ ] Login with invalid credentials
-- [ ] Role selection works correctly
-- [ ] Redirect to dashboard after login
-- [ ] Redirect to login if not authenticated
+## Testing
 
-### Request Creation
-- [ ] Create new CapEx request
-- [ ] Form validation works
-- [ ] File upload works
-- [ ] Drag-and-drop file upload
-- [ ] Form submission successful
-- [ ] Redirect to dashboard after submission
+### Test Checklist
+1. ✅ Login with all roles
+2. ✅ Create request with all fields
+3. ✅ Upload documents
+4. ✅ Approve/reject with comments (modal with textarea)
+5. ✅ View tiles on my-requests page
+6. ✅ Track approval chain
+7. ✅ Admin dashboard loads charts
+8. ✅ Fixed sidebar (non-collapsible)
+9. ✅ Data syncs across tabs
+10. ✅ Profile and logout work
+11. ✅ Dashboard metrics show correctly for all roles
+12. ✅ Pending approvals page with search and filters
+13. ✅ Expandable approval details
+14. ✅ Reports dashboard with charts
+15. ✅ Export data functionality
 
-### My Requests
-- [ ] View all my requests
-- [ ] Search functionality
-- [ ] Filter by status
-- [ ] Filter by type
-- [ ] View request details
-- [ ] Approval chain visualization
+### Test Scenarios
+```
+Scenario 1: Standard Approval (<₹25L)
+- Login as john.doe (requester)
+- Create request for ₹20L
+- Login as sarah.wilson (dept head) - approve with comment
+- Login as mike.johnson (plant head) - approve
+- Login as lisa.brown (CEO) - approve
+- Login as david.garcia (CFO) - approve
+- Check WBS/AUC codes generated
 
-### Approvals
-- [ ] View pending approvals
-- [ ] Approve request with comment
-- [ ] Reject request with reason
-- [ ] Download documents
-- [ ] View request details
-- [ ] Status updates correctly
+Scenario 2: Committee Approval (≥₹25L)
+- Login as john.doe (requester)
+- Create request for ₹45L
+- Login as sarah.wilson - approve (should show as "High Value")
+- Login as mike.johnson - approve
+- Login as committee.member - approve
+- Login as lisa.brown - approve
+- Login as david.garcia - approve
+- Check full approval chain
 
-### Reports
-- [ ] View all statistics
-- [ ] Request summary accurate
-- [ ] Amount analysis correct
-- [ ] Type distribution visible
-- [ ] Department breakdown shown
-- [ ] Export data works
+Scenario 3: Rejection
+- Create request
+- Login as approver (sarah.wilson)
+- Use modern approval interface to reject with mandatory comment
+- Check rejection tracking
 
-## Technical Details
+Scenario 4: Approval Interface Features
+- Login as sarah.wilson (department head)
+- Go to Pending Approvals
+- Use search to filter requests
+- Use filter buttons (All, High Amount)
+- Click "Show More" to expand details
+- Click approve/reject to see modal
+- Add comment and submit
 
-### Browser Compatibility
-- Modern browsers (Chrome, Firefox, Edge, Safari)
-- No IE11 support
-- Responsive design for mobile devices
+Scenario 5: Dashboard Metrics
+- Login as sarah.wilson (should see 10 total requests, not 0)
+- Login as admin.user (should see full stats with charts)
+- Verify all metrics display correctly
+```
 
-### Data Storage
-- Uses localStorage API
-- Data persists across page refreshes
-- No backend required for demo
+## Troubleshooting
 
-### CSS Framework
-- Custom CSS with CSS variables
-- Responsive breakpoints
-- Mobile-first approach
-- Font Awesome icons
+### Issue: "Changes may not be saved" dialog
+**Solution**: Already fixed - updated beforeunload handler in index.html
 
-### JavaScript
-- Vanilla JavaScript (ES6+)
-- No dependencies
-- Modular structure
-- Event-driven architecture
+### Issue: Data not syncing
+**Solution**: Check if sync.js is included in all pages, verify localStorage permissions
 
-## Future Enhancements
-- Backend API integration
-- Real database storage
-- Email notifications
-- SAP integration
-- Power BI integration
-- Advanced analytics
-- Document version control
-- Multi-language support
+### Issue: Charts not showing
+**Solution**: Check if Chart.js CDN is loaded, verify data exists
 
-## Summary
+### Issue: Sidebar not collapsing
+**Solution**: Check if sidebar-toggle event listener is properly attached
 
-The CapEx Automation Application is now complete with separate HTML pages for each major section. The application follows the system design and provides a comprehensive solution for managing Capital Expenditure requests through a streamlined approval workflow. All pages are integrated, functional, and ready for use.
+### Issue: Profile/Logout not working
+**Solution**: Verify event listeners in auth.js are properly attached
 
+## Deployment
+
+### For Development
+```
+Open index.html directly in browser
+No server required
+All data persists in localStorage
+```
+
+### For Production with Database
+```
+1. Setup MySQL database using capex_database.sql
+2. Create REST API backend (PHP/Node.js)
+3. Update API endpoints in all JS files
+4. Deploy to web server
+5. Configure database connection
+6. Update CORS settings if needed
+```
+
+## Support
+For technical support or questions, refer to:
+- System Design: `CapEx_System_Design_UPDATED.md`
+- Database Schema: `database/capex_database.sql`
+- Implementation Guide: This file
+
+## Version Information
+- **Version**: 2.0.0
+- **Release Date**: April 2024
+- **Database Version**: 1.0.0
+- **API Version**: Not implemented (future)
