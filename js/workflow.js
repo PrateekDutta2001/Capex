@@ -1,4 +1,4 @@
-// Workflow Management Module for CapEx Automation Application
+// Workflow Management Module for CapEx Portal Application
 
 class WorkflowManager {
     constructor() {

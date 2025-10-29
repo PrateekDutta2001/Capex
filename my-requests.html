@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CapEx Automation - My Requests</title>
+    <title>CapEx Portal - My Requests</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
@@ -16,9 +16,9 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <i class="fas fa-chart-line"></i>
-                    <span>CapEx Automation</span>
+                    <span>CapEx Portal</span>
                 </div>
-                <button class="sidebar-toggle" id="sidebarToggle">
+                <button class="sidebar-toggle" id="sidebarToggle" style="display: none;">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
@@ -134,6 +134,7 @@
                     <div class="requests-filters">
                         <div class="search-filter-bar">
                             <div class="search-input">
+                                <i class="fas fa-search"></i>
                                 <input type="text" id="requestSearch" placeholder="Search requests...">
                             </div>
                             <select id="statusFilter" class="filter-select">
@@ -151,23 +152,8 @@
                         </div>
                     </div>
                     
-                    <div class="requests-table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Request ID</th>
-                                    <th>Title</th>
-                                    <th>Type</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="requestsTableBody">
-                                <!-- Requests will be populated here -->
-                            </tbody>
-                        </table>
+                    <div class="requests-grid" id="requestsGrid">
+                        <!-- Requests will be populated here in tile style -->
                     </div>
                 </div>
             </div>
@@ -175,6 +161,7 @@
     </div>
     
     <script src="js/data.js"></script>
+    <script src="js/sync.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/workflow.js"></script>
     <script src="js/app.js"></script>
@@ -188,36 +175,100 @@
         // Update user interface
         updateUserInterface();
         
-        // Load my requests
+        // Load my requests in tile style
         function loadMyRequests() {
-            const requestsTableBody = document.getElementById('requestsTableBody');
+            const requestsGrid = document.getElementById('requestsGrid');
             const myRequests = authManager.getMyRequests();
             
             if (myRequests.length === 0) {
-                requestsTableBody.innerHTML = '<tr><td colspan="7" class="text-center">No requests found. <a href="request-form.html">Create your first request</a></td></tr>';
+                requestsGrid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                        <i class="fas fa-file-alt" style="font-size: 3rem; color: #94a3b8; margin-bottom: 1rem;"></i>
+                        <h3 style="color: #f8fafc; margin-bottom: 0.5rem;">No requests found</h3>
+                        <p style="color: #94a3b8; margin-bottom: 1.5rem;">Create your first CapEx request to get started</p>
+                        <a href="request-form.html" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> New Request
+                        </a>
+                    </div>
+                `;
                 return;
             }
             
-            requestsTableBody.innerHTML = myRequests.map(request => `
-                <tr>
-                    <td>${request.id}</td>
-                    <td>${request.title}</td>
-                    <td>${capexTypes.find(t => t.id === request.type)?.name || request.type}</td>
-                    <td>${formatCurrency(request.amount)}</td>
-                    <td>
-                        <div class="status status-${request.status}">
+            requestsGrid.innerHTML = myRequests.map(request => `
+                <div class="request-tile">
+                    <div class="tile-header">
+                        <div class="tile-id">${request.id}</div>
+                        <div class="tile-status status status-${request.status}">
                             <i class="fas fa-circle"></i>
                             ${statusDefinitions[request.status].label}
                         </div>
-                    </td>
-                    <td>${formatDate(request.createdAt)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-secondary" onclick="viewRequestDetails('${request.id}')">
-                            <i class="fas fa-eye"></i> View
+                    </div>
+                    <div class="tile-content">
+                        <h3 class="tile-title">${request.title}</h3>
+                        <p class="tile-description">${request.description || request.projectDescription || 'No description available'}</p>
+                        <div class="tile-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-rupee-sign"></i>
+                                <span>${formatCurrency(request.amount)}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>${formatDate(request.createdAt)}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-building"></i>
+                                <span>${request.department}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tile-footer">
+                        <button class="btn btn-sm btn-primary" onclick="viewRequestDetails('${request.id}')">
+                            <i class="fas fa-eye"></i> View Details
                         </button>
-                    </td>
-                </tr>
+                        ${request.status === 'pending' || request.status === 'in_progress' ? `
+                            <button class="btn btn-sm btn-secondary" onclick="viewApprovalChain('${request.id}')">
+                                <i class="fas fa-sitemap"></i> Track
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
             `).join('');
+        }
+        
+        function viewApprovalChain(requestId) {
+            const request = capexRequests.find(r => r.id === requestId);
+            if (!request) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h3>Approval Chain - ${request.id}</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="approval-chain">
+                            ${request.approvalChain.map((approval, index) => `
+                                <div class="approval-step ${approval.status}" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; margin-bottom: 1rem; border-left: 3px solid ${approval.status === 'approved' ? '#10b981' : approval.status === 'rejected' ? '#ef4444' : '#64748b'}; background-color: #1e293b; border-radius: 0.5rem;">
+                                    <div style="flex-shrink: 0;">
+                                        <i class="fas fa-${approval.status === 'approved' ? 'check-circle' : approval.status === 'rejected' ? 'times-circle' : 'clock'}" style="font-size: 1.5rem; color: ${approval.status === 'approved' ? '#10b981' : approval.status === 'rejected' ? '#ef4444' : '#64748b'};"></i>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; color: #f8fafc;">${roleDefinitions[approval.level]?.label || approval.level}</div>
+                                        <div style="color: #94a3b8; font-size: 0.875rem;">${approval.userName || 'Pending'}</div>
+                                        ${approval.timestamp ? `<div style="color: #64748b; font-size: 0.75rem; margin-top: 0.25rem;">${formatDate(approval.timestamp)}</div>` : ''}
+                                        ${approval.comments ? `<div style="margin-top: 0.5rem; padding: 0.5rem; background-color: #334155; border-radius: 0.25rem; font-size: 0.875rem; color: #cbd5e1;">${approval.comments}</div>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
         }
         
         function viewRequestDetails(requestId) {
@@ -332,32 +383,57 @@
                 return matchesSearch && matchesStatus && matchesType;
             });
             
-            const requestsTableBody = document.getElementById('requestsTableBody');
+            const requestsGrid = document.getElementById('requestsGrid');
             
             if (filteredRequests.length === 0) {
-                requestsTableBody.innerHTML = '<tr><td colspan="7" class="text-center">No requests match your filters.</td></tr>';
+                requestsGrid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+                        <i class="fas fa-search" style="font-size: 3rem; color: #94a3b8; margin-bottom: 1rem;"></i>
+                        <h3 style="color: #f8fafc; margin-bottom: 0.5rem;">No requests match your filters</h3>
+                        <p style="color: #94a3b8;">Try adjusting your search criteria</p>
+                    </div>
+                `;
                 return;
             }
             
-            requestsTableBody.innerHTML = filteredRequests.map(request => `
-                <tr>
-                    <td>${request.id}</td>
-                    <td>${request.title}</td>
-                    <td>${capexTypes.find(t => t.id === request.type)?.name || request.type}</td>
-                    <td>${formatCurrency(request.amount)}</td>
-                    <td>
-                        <div class="status status-${request.status}">
+            requestsGrid.innerHTML = filteredRequests.map(request => `
+                <div class="request-tile">
+                    <div class="tile-header">
+                        <div class="tile-id">${request.id}</div>
+                        <div class="tile-status status status-${request.status}">
                             <i class="fas fa-circle"></i>
                             ${statusDefinitions[request.status].label}
                         </div>
-                    </td>
-                    <td>${formatDate(request.createdAt)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-secondary" onclick="viewRequestDetails('${request.id}')">
-                            <i class="fas fa-eye"></i> View
+                    </div>
+                    <div class="tile-content">
+                        <h3 class="tile-title">${request.title}</h3>
+                        <p class="tile-description">${request.description || request.projectDescription || 'No description available'}</p>
+                        <div class="tile-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-rupee-sign"></i>
+                                <span>${formatCurrency(request.amount)}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>${formatDate(request.createdAt)}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-building"></i>
+                                <span>${request.department}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tile-footer">
+                        <button class="btn btn-sm btn-primary" onclick="viewRequestDetails('${request.id}')">
+                            <i class="fas fa-eye"></i> View Details
                         </button>
-                    </td>
-                </tr>
+                        ${request.status === 'pending' || request.status === 'in_progress' ? `
+                            <button class="btn btn-sm btn-secondary" onclick="viewApprovalChain('${request.id}')">
+                                <i class="fas fa-sitemap"></i> Track
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
             `).join('');
         }
         
@@ -380,9 +456,18 @@
         // Setup sidebar toggle
         const sidebarToggle = document.getElementById('sidebarToggle');
         if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', () => {
+            sidebarToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const sidebar = document.getElementById('sidebar');
                 sidebar.classList.toggle('collapsed');
+                
+                // Update icon
+                const icon = sidebarToggle.querySelector('i');
+                if (sidebar.classList.contains('collapsed')) {
+                    icon.className = 'fas fa-bars';
+                } else {
+                    icon.className = 'fas fa-times';
+                }
             });
         }
         
@@ -392,6 +477,14 @@
             mobileMenuToggle.addEventListener('click', () => {
                 const sidebar = document.getElementById('sidebar');
                 sidebar.classList.toggle('show');
+            });
+        }
+        
+        // Fix profile and logout buttons
+        const profileBtn = document.getElementById('profileBtn');
+        if (profileBtn) {
+            profileBtn.addEventListener('click', () => {
+                showMessage('Profile feature coming soon!', 'info');
             });
         }
         

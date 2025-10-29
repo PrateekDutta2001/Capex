@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CapEx Automation - Create Request</title>
+    <title>CapEx Portal - Create Request</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
@@ -16,9 +16,9 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <i class="fas fa-chart-line"></i>
-                    <span>CapEx Automation</span>
+                    <span>CapEx Portal</span>
                 </div>
-                <button class="sidebar-toggle" id="sidebarToggle">
+                <button class="sidebar-toggle" id="sidebarToggle" style="display: none;">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
@@ -128,51 +128,221 @@
                     </div>
                     
                     <form id="capexRequestForm" class="capex-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="requestTitle">Request Title *</label>
-                                <input type="text" id="requestTitle" name="title" required placeholder="Enter request title">
+                        <div class="form-section">
+                            <h3>Basic Information</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="location">Location *</label>
+                                    <input type="text" id="location" name="location" required placeholder="e.g., Jodimetla">
+                                </div>
+                                <div class="form-group">
+                                    <label for="department">Department *</label>
+                                    <input type="text" id="department" name="department" required placeholder="Enter department" value="">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="requestType">CapEx Type *</label>
-                                <select id="requestType" name="type" required>
-                                    <option value="">Select CapEx Type</option>
-                                    <option value="revenue_growth">Revenue Growth CapEx</option>
-                                    <option value="maintenance">Maintenance CapEx</option>
-                                </select>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="dateOfProposal">Date of Proposal *</label>
+                                    <input type="date" id="dateOfProposal" name="dateOfProposal" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="financialYear">Financial Year *</label>
+                                    <input type="text" id="financialYear" name="financialYear" required placeholder="e.g., 2025-2026">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="requestTitle">Name of Project *</label>
+                                    <input type="text" id="requestTitle" name="title" required placeholder="Enter project name">
+                                </div>
+                                <div class="form-group">
+                                    <label for="purposeOfCapex">Purpose of CapEx *</label>
+                                    <input type="text" id="purposeOfCapex" name="purposeOfCapex" required placeholder="e.g., Access control in CDMO Unit-2">
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="requestDescription">Description *</label>
-                            <textarea id="requestDescription" name="description" required placeholder="Describe the CapEx request in detail" rows="5"></textarea>
+
+                        <div class="form-section">
+                            <h3>Project Type</h3>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="projectType" value="increased_production">
+                                    <span>Increased Production</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="projectType" value="cost_reduction">
+                                    <span>Cost reduction/OE</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="projectType" value="quality_safety">
+                                    <span>Quality/Safety Improvement</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="projectType" value="project_revision">
+                                    <span>Project revision</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="projectType" value="compliance">
+                                    <span>Compliance/Regulatory/customer</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="projectType" value="environmental">
+                                    <span>Environmental matters</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="projectType" value="replacement">
+                                    <span>Replacement of equipment</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="projectType" value="others">
+                                    <span>Others</span>
+                                </label>
+                            </div>
                         </div>
-                        
-                        <div class="form-row">
+
+                        <div class="form-section">
+                            <h3>Project Description</h3>
                             <div class="form-group">
-                                <label for="requestAmount">Amount (INR) *</label>
-                                <input type="number" id="requestAmount" name="amount" required placeholder="Enter amount in INR" min="1" step="100">
+                                <label for="requestDescription">Project Description (Detail proposal can be annexed) *</label>
+                                <textarea id="requestDescription" name="projectDescription" required placeholder="Describe the project in detail" rows="4"></textarea>
                             </div>
                             <div class="form-group">
-                                <label for="expectedDelivery">Expected Delivery Date</label>
-                                <input type="date" id="expectedDelivery" name="expectedDelivery">
+                                <label for="currentProcess">Current Process</label>
+                                <textarea id="currentProcess" name="currentProcess" placeholder="Describe the current process" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="justification">Justification for the CapEx Proposed *</label>
+                                <textarea id="justification" name="justification" required placeholder="Explain the business need" rows="4"></textarea>
                             </div>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="justification">Business Justification *</label>
-                            <textarea id="justification" name="justification" required placeholder="Explain the business need and expected benefits" rows="5"></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="documentUpload">Supporting Documents</label>
-                            <div class="file-upload-area" id="fileUploadArea">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <p>Drag and drop files here or click to browse</p>
-                                <p class="file-hint">Accepted formats: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (Max 10MB per file)</p>
-                                <input type="file" id="documentUpload" name="documents" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+
+                        <div class="form-section">
+                            <h3>Similar Activity</h3>
+                            <div class="form-group">
+                                <label for="similarActivity">Similar Activity if Already Executed - The Working Experience (details may be mentioned)</label>
+                                <textarea id="similarActivity" name="similarActivity" placeholder="Describe similar activities if any" rows="3"></textarea>
                             </div>
-                            <div class="file-list" id="fileList"></div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Support Attached</h3>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="market_evaluation">
+                                    <span>Market evaluation</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="layouts">
+                                    <span>Layouts</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="catalogs">
+                                    <span>Catalogs/Technical details</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="technical_comparison">
+                                    <span>Technical comparison</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="quotations">
+                                    <span>Quotations from vendors</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="regulatory">
+                                    <span>Regulatory/Audit Observation</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="finance_evaluation">
+                                    <span>Finance evaluation comparison</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="detail_justification">
+                                    <span>Detail Justification</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="key_contract">
+                                    <span>Key contract terms comparison</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="executive_summary">
+                                    <span>Executive Summary</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="comments">
+                                    <span>Comments</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="supportAttached" value="others">
+                                    <span>Others</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Project Timeline</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="projectDuration">Project Duration, Expected Time Lines</label>
+                                    <input type="text" id="projectDuration" name="projectDuration" placeholder="e.g., 2 Weeks">
+                                </div>
+                                <div class="form-group">
+                                    <label for="requiredByDate">Required By Date</label>
+                                    <input type="text" id="requiredByDate" name="requiredByDate" placeholder="e.g., Immediate">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Economic Evaluation</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="capexAmount">Capex Amount (INR) *</label>
+                                    <input type="number" id="capexAmount" name="capexAmount" required placeholder="Enter amount" min="1" step="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="machineryCost">Machinery Cost (INR)</label>
+                                    <input type="number" id="machineryCost" name="machineryCost" placeholder="Enter machinery cost" min="0" step="100">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="installation">Installation (INR)</label>
+                                    <input type="number" id="installation" name="installation" placeholder="Enter installation cost" min="0" step="100">
+                                </div>
+                                <div class="form-group">
+                                    <label for="otherBreakdown">Other Breakdown (INR)</label>
+                                    <input type="number" id="otherBreakdown" name="otherBreakdown" placeholder="Enter other costs" min="0" step="100">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="paybackPeriod">Payback Period</label>
+                                    <input type="text" id="paybackPeriod" name="paybackPeriod" placeholder="e.g., Years/1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="npvPayback">NPV of Payback</label>
+                                    <input type="text" id="npvPayback" name="npvPayback" placeholder="Enter NPV">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="detailedWorking">Detailed working of payback (to explain)</label>
+                                <textarea id="detailedWorking" name="detailedWorking" placeholder="Explain detailed payback working" rows="3"></textarea>
+                            </div>
+                            <p class="form-note">(Working in excel of the expected cash flows by this project is to be vetted from F&A)</p>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Supporting Documents</h3>
+                            <div class="form-group">
+                                <label for="documentUpload">Upload Documents</label>
+                                <div class="file-upload-area" id="fileUploadArea">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag and drop files here or click to browse</p>
+                                    <p class="file-hint">Accepted formats: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (Max 10MB per file)</p>
+                                    <input type="file" id="documentUpload" name="documents" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+                                </div>
+                                <div class="file-list" id="fileList"></div>
+                            </div>
                         </div>
                         
                         <div class="form-actions">
@@ -190,6 +360,7 @@
     </div>
     
     <script src="js/data.js"></script>
+    <script src="js/sync.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/workflow.js"></script>
     <script src="js/app.js"></script>
@@ -274,6 +445,15 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
         
+        // Auto-fill user's department
+        const currentUser = authManager.getCurrentUser();
+        if (currentUser) {
+            const departmentField = document.getElementById('department');
+            if (departmentField) {
+                departmentField.value = currentUser.department;
+            }
+        }
+        
         // Form submission
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -286,16 +466,43 @@
             
             const formData = new FormData(form);
             
+            // Get project types
+            const projectTypes = [];
+            form.querySelectorAll('input[name="projectType"]:checked').forEach(cb => {
+                projectTypes.push(cb.value);
+            });
+            
+            // Get support attached
+            const supportAttached = [];
+            form.querySelectorAll('input[name="supportAttached"]:checked').forEach(cb => {
+                supportAttached.push(cb.value);
+            });
+            
             const requestData = {
-                id: 'CAPEX-2024-' + String(capexRequests.length + 1).padStart(3, '0'),
+                id: 'CAPEX-' + new Date().getFullYear() + '-' + String(capexRequests.length + 1).padStart(3, '0'),
                 title: formData.get('title'),
-                description: formData.get('description'),
-                type: formData.get('type'),
-                amount: parseFloat(formData.get('amount')),
-                currency: 'INR',
-                department: currentUser.department,
+                location: formData.get('location'),
+                department: formData.get('department') || currentUser.department,
                 plant: currentUser.plant,
                 businessUnit: currentUser.businessUnit,
+                dateOfProposal: formData.get('dateOfProposal'),
+                financialYear: formData.get('financialYear'),
+                purposeOfCapex: formData.get('purposeOfCapex'),
+                projectType: projectTypes,
+                projectDescription: formData.get('projectDescription'),
+                currentProcess: formData.get('currentProcess'),
+                justification: formData.get('justification'),
+                similarActivity: formData.get('similarActivity'),
+                supportAttached: supportAttached,
+                projectDuration: formData.get('projectDuration'),
+                requiredByDate: formData.get('requiredByDate'),
+                capexAmount: parseFloat(formData.get('capexAmount')),
+                machineryCost: parseFloat(formData.get('machineryCost')) || 0,
+                installation: parseFloat(formData.get('installation')) || 0,
+                otherBreakdown: parseFloat(formData.get('otherBreakdown')) || 0,
+                paybackPeriod: formData.get('paybackPeriod'),
+                npvPayback: formData.get('npvPayback'),
+                detailedWorking: formData.get('detailedWorking'),
                 requesterId: currentUser.id,
                 requesterName: currentUser.name,
                 status: 'pending',
@@ -303,15 +510,19 @@
                 documents: [],
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
-                expectedDelivery: formData.get('expectedDelivery'),
-                justification: formData.get('justification'),
                 wbsCode: null,
                 aucCode: null,
                 poNumber: null
             };
             
+            // Set amount for backward compatibility
+            requestData.amount = requestData.capexAmount;
+            requestData.description = requestData.projectDescription;
+            requestData.type = 'revenue_growth'; // Default type
+            requestData.expectedDelivery = requestData.requiredByDate;
+            
             // Add documents
-            selectedFiles.forEach((file, index) => {
+            selectedFiles.forEach((file) => {
                 requestData.documents.push({
                     name: file.name,
                     type: file.type,
@@ -333,7 +544,7 @@
             ];
             
             // Add approval chain based on amount
-            if (requestData.amount >= approvalThresholds.committeeReview) {
+            if (requestData.capexAmount >= approvalThresholds.committeeReview) {
                 requestData.approvalChain.push(
                     { level: 'department_head', userId: null, userName: '', status: 'pending', timestamp: null, comments: '' },
                     { level: 'plant_head', userId: null, userName: '', status: 'pending', timestamp: null, comments: '' },
@@ -367,9 +578,18 @@
         // Setup sidebar toggle
         const sidebarToggle = document.getElementById('sidebarToggle');
         if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', () => {
+            sidebarToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const sidebar = document.getElementById('sidebar');
                 sidebar.classList.toggle('collapsed');
+                
+                // Update icon
+                const icon = sidebarToggle.querySelector('i');
+                if (sidebar.classList.contains('collapsed')) {
+                    icon.className = 'fas fa-bars';
+                } else {
+                    icon.className = 'fas fa-times';
+                }
             });
         }
         
@@ -393,6 +613,14 @@
             
             document.addEventListener('click', () => {
                 userDropdown.classList.remove('show');
+            });
+        }
+        
+        // Fix profile and logout buttons
+        const profileBtn = document.getElementById('profileBtn');
+        if (profileBtn) {
+            profileBtn.addEventListener('click', () => {
+                showMessage('Profile feature coming soon!', 'info');
             });
         }
         

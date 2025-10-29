@@ -1,4 +1,4 @@
-// Authentication Module for CapEx Automation Application
+// Authentication Module for CapEx Portal Application
 
 class AuthManager {
     constructor() {
@@ -104,24 +104,34 @@ class AuthManager {
     getPendingApprovals() {
         if (!this.canApprove()) return [];
         
-        const currentUserId = this.currentUser.id;
         const currentUserRole = this.currentUser.role;
         
         return capexRequests.filter(request => {
             if (request.status === 'pending' || request.status === 'in_progress') {
-                // Find the current approver in the approval chain
-                const currentApprover = request.approvalChain.find(approval => 
-                    approval.status === 'pending' && approval.userId === currentUserId
+                // Find the first pending approval in the chain
+                const pendingApproval = request.approvalChain.find(approval => 
+                    approval.status === 'pending'
                 );
                 
-                // Also check if the current user's role matches the current approver role
-                const roleMatch = request.currentApprover === currentUserRole;
+                if (!pendingApproval) return false;
                 
-                return currentApprover || roleMatch;
+                // Check if this user can approve at this level
+                // User can approve if their role matches the pending approval level
+                if (pendingApproval.level === currentUserRole) {
+                    return true;
+                }
+                
+                // Also check currentApprover field
+                if (request.currentApprover === currentUserRole) {
+                    return true;
+                }
+                
+                return false;
             }
             return false;
         });
     }
+    
 
     getMyRequests() {
         if (!this.currentUser) return [];
@@ -131,6 +141,14 @@ class AuthManager {
         );
     }
 
+    canViewAllRequests() {
+        if (!this.currentUser) return false;
+        
+        // Admins and approvers can view all requests
+        const approverRoles = ['department_head', 'plant_head', 'business_ceo', 'cfo', 'capex_committee', 'admin'];
+        return approverRoles.includes(this.currentUser.role);
+    }
+    
     getDashboardStats() {
         const myRequests = this.getMyRequests();
         const pendingApprovals = this.getPendingApprovals();

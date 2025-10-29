@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CapEx Automation - Pending Approvals</title>
+    <title>CapEx Portal - Pending Approvals</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
@@ -16,9 +16,9 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <i class="fas fa-chart-line"></i>
-                    <span>CapEx Automation</span>
+                    <span>CapEx Portal</span>
                 </div>
-                <button class="sidebar-toggle" id="sidebarToggle">
+                <button class="sidebar-toggle" id="sidebarToggle" style="display: none;">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
@@ -127,6 +127,19 @@
                         <p>Review and approve CapEx requests that require your attention</p>
                     </div>
                     
+                    <!-- Filter and Search Bar -->
+                    <div class="approvals-toolbar">
+                        <div class="search-bar">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchApprovals" placeholder="Search requests...">
+                        </div>
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="all">All</button>
+                            <button class="filter-btn" data-filter="high">High Amount</button>
+                            <button class="filter-btn" data-filter="urgent">Urgent</button>
+                        </div>
+                    </div>
+                    
                     <div class="approvals-list" id="approvalsList">
                         <!-- Approvals will be populated here -->
                     </div>
@@ -136,6 +149,7 @@
     </div>
     
     <script src="js/data.js"></script>
+    <script src="js/sync.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/workflow.js"></script>
     <script src="js/app.js"></script>
@@ -166,95 +180,162 @@
             }
             
             approvalsList.innerHTML = pendingApprovals.map(request => `
-                <div class="approval-card">
-                    <div class="approval-card-header">
-                        <div class="approval-info">
-                            <h3>${request.title}</h3>
-                            <div class="approval-meta">
-                                <span class="request-id">${request.id}</span>
-                                <span class="requester">Requested by: ${request.requesterName}</span>
-                                <span class="amount">${formatCurrency(request.amount)}</span>
-                            </div>
+                <div class="approval-card-modern" data-amount="${request.amount}" data-id="${request.id}">
+                    <div class="approval-card-top">
+                        <div class="approval-urgency-badge ${request.amount > 2500000 ? 'high-amount' : 'normal-amount'}">
+                            <i class="fas fa-${request.amount > 2500000 ? 'exclamation-triangle' : 'file-alt'}"></i>
+                            ${request.amount > 2500000 ? 'High Value' : 'Standard'}
                         </div>
-                        <div class="approval-status">
-                            <div class="status status-${request.status}">
-                                <i class="fas fa-circle"></i>
-                                ${statusDefinitions[request.status].label}
-                            </div>
+                        <div class="approval-status-modern">
+                            <span class="status status-${request.status}">
+                                ${statusDefinitions[request.status]?.label || request.status}
+                            </span>
                         </div>
                     </div>
                     
-                    <div class="approval-card-body">
-                        <div class="approval-description">
+                    <div class="approval-card-content">
+                        <div class="approval-title-section">
+                            <h3>${request.title}</h3>
+                            <span class="request-id-badge">${request.id}</span>
+                        </div>
+                        
+                        <div class="approval-description-modern">
                             <p>${request.description}</p>
                         </div>
                         
-                        <div class="approval-details">
-                            <div class="detail-item">
-                                <label>CapEx Type:</label>
-                                <span>${capexTypes.find(t => t.id === request.type)?.name}</span>
+                        <div class="approval-quick-info">
+                            <div class="quick-info-item">
+                                <i class="fas fa-rupee-sign"></i>
+                                <span class="amount-highlight">${formatCurrency(request.amount)}</span>
                             </div>
-                            <div class="detail-item">
-                                <label>Department:</label>
+                            <div class="quick-info-item">
+                                <i class="fas fa-user"></i>
+                                <span>${request.requesterName}</span>
+                            </div>
+                            <div class="quick-info-item">
+                                <i class="fas fa-building"></i>
                                 <span>${request.department}</span>
                             </div>
-                            <div class="detail-item">
-                                <label>Plant:</label>
+                            <div class="quick-info-item">
+                                <i class="fas fa-industry"></i>
                                 <span>${request.plant}</span>
                             </div>
-                            <div class="detail-item">
-                                <label>Expected Delivery:</label>
-                                <span>${request.expectedDelivery ? formatDate(request.expectedDelivery) : 'Not specified'}</span>
-                            </div>
                         </div>
                         
-                        <div class="approval-justification">
-                            <label>Business Justification:</label>
-                            <p>${request.justification}</p>
-                        </div>
-                        
-                        ${request.documents.length > 0 ? `
-                            <div class="approval-documents">
-                                <label>Supporting Documents:</label>
-                                <div class="document-list">
-                                    ${request.documents.map(doc => `
-                                        <div class="document-item">
-                                            <i class="fas fa-file"></i>
-                                            <span>${doc.name}</span>
-                                            <button class="btn btn-sm btn-secondary" onclick="downloadDocument('${doc.name}')">
-                                                <i class="fas fa-download"></i>
-                                            </button>
-                                        </div>
-                                    `).join('')}
+                        <div class="approval-expanded-info" style="display: none;">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label><i class="fas fa-tag"></i> Type:</label>
+                                    <span>${capexTypes.find(t => t.id === request.type)?.name}</span>
+                                </div>
+                                <div class="info-item">
+                                    <label><i class="fas fa-calendar"></i> Delivery:</label>
+                                    <span>${request.expectedDelivery ? formatDate(request.expectedDelivery) : 'Not specified'}</span>
                                 </div>
                             </div>
-                        ` : ''}
+                            
+                            <div class="justification-box">
+                                <label><i class="fas fa-lightbulb"></i> Business Justification:</label>
+                                <p>${request.justification || 'No justification provided'}</p>
+                            </div>
+                            
+                            ${request.documents.length > 0 ? `
+                                <div class="documents-section">
+                                    <label><i class="fas fa-file-pdf"></i> Supporting Documents:</label>
+                                    <div class="documents-grid">
+                                        ${request.documents.map(doc => `
+                                            <div class="document-card">
+                                                <i class="fas fa-file-pdf"></i>
+                                                <span>${doc.name}</span>
+                                                <small>${doc.size}</small>
+                                                <button class="btn-icon" onclick="downloadDocument('${doc.name}')" title="Download">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <button class="toggle-details-btn" onclick="toggleApprovalDetails(this)">
+                            <i class="fas fa-chevron-down"></i> Show More
+                        </button>
                     </div>
                     
-                    <div class="approval-card-footer">
-                        <div class="approval-actions">
-                            <button class="btn btn-success" onclick="approveRequest('${request.id}')">
-                                <i class="fas fa-check"></i> Approve
-                            </button>
-                            <button class="btn btn-error" onclick="rejectRequest('${request.id}')">
-                                <i class="fas fa-times"></i> Reject
-                            </button>
-                            <button class="btn btn-secondary" onclick="viewRequestDetails('${request.id}')">
-                                <i class="fas fa-eye"></i> View Details
-                            </button>
-                        </div>
+                    <div class="approval-card-actions">
+                        <button class="btn btn-success btn-lg" onclick="showApproveModal('${request.id}')">
+                            <i class="fas fa-check-circle"></i> Approve
+                        </button>
+                        <button class="btn btn-error btn-lg" onclick="showRejectModal('${request.id}')">
+                            <i class="fas fa-times-circle"></i> Reject
+                        </button>
                     </div>
                 </div>
             `).join('');
         }
         
+        function showApproveModal(requestId) {
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <div class="modal-header">
+                        <h3>Approve Request</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="approvalComment">Add Comment (Optional):</label>
+                            <textarea id="approvalComment" rows="4" placeholder="Enter your approval comment..." style="width: 100%; padding: 0.75rem; border: 1px solid #334155; border-radius: 0.5rem; background-color: #1e293b; color: #f8fafc;"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding: 1.5rem; border-top: 1px solid #334155; display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                        <button class="btn btn-success" onclick="approveRequest('${requestId}')">Approve</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function showRejectModal(requestId) {
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px;">
+                    <div class="modal-header">
+                        <h3>Reject Request</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="rejectionComment">Reason for Rejection *:</label>
+                            <textarea id="rejectionComment" rows="4" placeholder="Enter reason for rejection..." required style="width: 100%; padding: 0.75rem; border: 1px solid #334155; border-radius: 0.5rem; background-color: #1e293b; color: #f8fafc;"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding: 1.5rem; border-top: 1px solid #334155; display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Cancel</button>
+                        <button class="btn btn-error" onclick="rejectRequest('${requestId}')">Reject</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
         function approveRequest(requestId) {
             const request = capexRequests.find(r => r.id === requestId);
             if (!request) return;
             
-            const currentUser = authManager.getCurrentUser();
-            const comment = prompt('Optional: Add a comment for approval:');
+            const modal = document.querySelector('.modal.show');
+            const commentTextarea = modal.querySelector('#approvalComment');
+            const comment = commentTextarea ? commentTextarea.value : '';
             
+            const currentUser = authManager.getCurrentUser();
             const approvalLevel = request.approvalChain.find(approval => 
                 approval.status === 'pending'
             );
@@ -284,6 +365,7 @@
                 // Update localStorage
                 localStorage.setItem('capex_requests', JSON.stringify(capexRequests));
                 
+                if (modal) modal.remove();
                 showMessage('Request approved successfully!', 'success');
                 loadPendingApprovals();
                 updatePendingApprovalsCount();
@@ -294,8 +376,14 @@
             const request = capexRequests.find(r => r.id === requestId);
             if (!request) return;
             
-            const reason = prompt('Please provide a reason for rejection:');
-            if (!reason) return;
+            const modal = document.querySelector('.modal.show');
+            const commentTextarea = modal.querySelector('#rejectionComment');
+            const reason = commentTextarea ? commentTextarea.value : '';
+            
+            if (!reason || reason.trim() === '') {
+                showMessage('Please provide a reason for rejection', 'error');
+                return;
+            }
             
             const currentUser = authManager.getCurrentUser();
             const approvalLevel = request.approvalChain.find(approval => 
@@ -316,6 +404,7 @@
                 // Update localStorage
                 localStorage.setItem('capex_requests', JSON.stringify(capexRequests));
                 
+                if (modal) modal.remove();
                 showMessage('Request rejected', 'error');
                 loadPendingApprovals();
                 updatePendingApprovalsCount();
@@ -403,6 +492,70 @@
             showMessage(`Downloading ${filename}...`, 'info');
         }
         
+        function toggleApprovalDetails(button) {
+            const card = button.closest('.approval-card-modern');
+            const expandedInfo = card.querySelector('.approval-expanded-info');
+            const icon = button.querySelector('i');
+            
+            if (expandedInfo.style.display === 'none') {
+                expandedInfo.style.display = 'block';
+                button.innerHTML = '<i class="fas fa-chevron-up"></i> Show Less';
+            } else {
+                expandedInfo.style.display = 'none';
+                button.innerHTML = '<i class="fas fa-chevron-down"></i> Show More';
+            }
+        }
+        
+        // Search functionality
+        const searchInput = document.getElementById('searchApprovals');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const cards = document.querySelectorAll('.approval-card-modern');
+                
+                cards.forEach(card => {
+                    const title = card.querySelector('h3').textContent.toLowerCase();
+                    const description = card.querySelector('.approval-description-modern p').textContent.toLowerCase();
+                    const id = card.dataset.id.toLowerCase();
+                    
+                    if (title.includes(searchTerm) || description.includes(searchTerm) || id.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        // Filter functionality
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                filterButtons.forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                const cards = document.querySelectorAll('.approval-card-modern');
+                
+                cards.forEach(card => {
+                    const amount = parseInt(card.dataset.amount);
+                    
+                    if (filter === 'all') {
+                        card.style.display = 'block';
+                    } else if (filter === 'high' && amount >= 2500000) {
+                        card.style.display = 'block';
+                    } else if (filter === 'high') {
+                        card.style.display = 'none';
+                    } else if (filter === 'urgent') {
+                        // Show all for now, can add urgent logic later
+                        card.style.display = 'block';
+                    }
+                });
+            });
+        });
+        
         function formatCurrency(amount) {
             return new Intl.NumberFormat('en-IN', {
                 style: 'currency',
@@ -422,9 +575,18 @@
         // Setup sidebar toggle
         const sidebarToggle = document.getElementById('sidebarToggle');
         if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', () => {
+            sidebarToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const sidebar = document.getElementById('sidebar');
                 sidebar.classList.toggle('collapsed');
+                
+                // Update icon
+                const icon = sidebarToggle.querySelector('i');
+                if (sidebar.classList.contains('collapsed')) {
+                    icon.className = 'fas fa-bars';
+                } else {
+                    icon.className = 'fas fa-times';
+                }
             });
         }
         
@@ -434,6 +596,14 @@
             mobileMenuToggle.addEventListener('click', () => {
                 const sidebar = document.getElementById('sidebar');
                 sidebar.classList.toggle('show');
+            });
+        }
+        
+        // Fix profile and logout buttons
+        const profileBtn = document.getElementById('profileBtn');
+        if (profileBtn) {
+            profileBtn.addEventListener('click', () => {
+                showMessage('Profile feature coming soon!', 'info');
             });
         }
         
@@ -462,7 +632,11 @@
         }
         
         // Load approvals on page load
-        loadPendingApprovals();
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                loadPendingApprovals();
+            }, 100);
+        });
     </script>
 </body>
 </html>

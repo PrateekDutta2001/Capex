@@ -1,4 +1,4 @@
-// Sample Data for CapEx Automation Application
+// Sample Data for CapEx Portal Application
 
 // User Data
 const users = [
@@ -324,6 +324,136 @@ const capexRequests = [
         updatedAt: '2024-01-16T11:15:00Z',
         expectedDelivery: '2024-09-30',
         justification: 'Required to handle increased inventory volume and improve accuracy',
+        wbsCode: null,
+        aucCode: null,
+        poNumber: null
+    },
+    {
+        id: 'CAPEX-2024-007',
+        title: 'Laboratory Equipment Upgradation',
+        description: 'Upgradation of analytical laboratory equipment for improved testing capabilities',
+        type: 'revenue_growth',
+        amount: 950000,
+        currency: 'INR',
+        department: 'Quality Control',
+        plant: 'Plant B',
+        businessUnit: 'Manufacturing',
+        requesterId: 8,
+        requesterName: 'Jane Miller',
+        status: 'pending',
+        currentApprover: 'department_head',
+        approvalChain: [
+            { level: 'requester', userId: 8, userName: 'Jane Miller', status: 'approved', timestamp: '2024-01-17T09:00:00Z', comments: 'Request submitted' },
+            { level: 'department_head', userId: 9, userName: 'Tom Davis', status: 'pending', timestamp: null, comments: '' },
+            { level: 'plant_head', userId: 10, userName: 'Alex Chen', status: 'pending', timestamp: null, comments: '' },
+            { level: 'business_ceo', userId: 4, userName: 'Lisa Brown', status: 'pending', timestamp: null, comments: '' },
+            { level: 'cfo', userId: 5, userName: 'David Garcia', status: 'pending', timestamp: null, comments: '' }
+        ],
+        documents: [
+            { name: 'Equipment Specifications.pdf', type: 'pdf', size: '1.8MB', uploadedAt: '2024-01-17T09:15:00Z' }
+        ],
+        createdAt: '2024-01-17T09:00:00Z',
+        updatedAt: '2024-01-17T09:00:00Z',
+        expectedDelivery: '2024-06-30',
+        justification: 'Needed for improved testing accuracy and compliance',
+        wbsCode: null,
+        aucCode: null,
+        poNumber: null
+    },
+    {
+        id: 'CAPEX-2024-008',
+        title: 'Compressed Air System Upgrade',
+        description: 'Upgrade of compressed air system for improved energy efficiency',
+        type: 'maintenance',
+        amount: 1200000,
+        currency: 'INR',
+        department: 'Maintenance',
+        plant: 'Plant A',
+        businessUnit: 'Manufacturing',
+        requesterId: 8,
+        requesterName: 'Jane Miller',
+        status: 'in_progress',
+        currentApprover: 'plant_head',
+        approvalChain: [
+            { level: 'requester', userId: 8, userName: 'Jane Miller', status: 'approved', timestamp: '2024-01-05T10:00:00Z', comments: 'Request submitted' },
+            { level: 'department_head', userId: 9, userName: 'Tom Davis', status: 'approved', timestamp: '2024-01-06T11:30:00Z', comments: 'Approved - Energy savings' },
+            { level: 'plant_head', userId: 3, userName: 'Mike Johnson', status: 'pending', timestamp: null, comments: '' },
+            { level: 'business_ceo', userId: 4, userName: 'Lisa Brown', status: 'pending', timestamp: null, comments: '' },
+            { level: 'cfo', userId: 5, userName: 'David Garcia', status: 'pending', timestamp: null, comments: '' }
+        ],
+        documents: [
+            { name: 'System Design.pdf', type: 'pdf', size: '2.3MB', uploadedAt: '2024-01-05T10:15:00Z' }
+        ],
+        createdAt: '2024-01-05T10:00:00Z',
+        updatedAt: '2024-01-06T11:30:00Z',
+        expectedDelivery: '2024-04-30',
+        justification: 'Energy efficiency improvement',
+        wbsCode: null,
+        aucCode: null,
+        poNumber: null
+    },
+    {
+        id: 'CAPEX-2024-009',
+        title: 'IT Security System Installation',
+        description: 'Installation of comprehensive IT security monitoring and protection system',
+        type: 'maintenance',
+        amount: 3500000,
+        currency: 'INR',
+        department: 'IT',
+        plant: 'All Plants',
+        businessUnit: 'All Business Units',
+        requesterId: 7,
+        requesterName: 'Admin User',
+        status: 'pending',
+        currentApprover: 'capex_committee',
+        approvalChain: [
+            { level: 'requester', userId: 7, userName: 'Admin User', status: 'approved', timestamp: '2024-01-18T08:00:00Z', comments: 'Request submitted' },
+            { level: 'department_head', userId: 7, userName: 'Admin User', status: 'approved', timestamp: '2024-01-18T08:15:00Z', comments: 'Self-approved as IT head' },
+            { level: 'plant_head', userId: 3, userName: 'Mike Johnson', status: 'approved', timestamp: '2024-01-19T09:30:00Z', comments: 'Approved - Critical security' },
+            { level: 'capex_committee', userId: 6, userName: 'Robert Smith', status: 'pending', timestamp: null, comments: '' },
+            { level: 'business_ceo', userId: 4, userName: 'Lisa Brown', status: 'pending', timestamp: null, comments: '' },
+            { level: 'cfo', userId: 5, userName: 'David Garcia', status: 'pending', timestamp: null, comments: '' }
+        ],
+        documents: [
+            { name: 'Security Analysis.pdf', type: 'pdf', size: '4.5MB', uploadedAt: '2024-01-18T08:20:00Z' },
+            { name: 'Vendor Quotes.xlsx', type: 'excel', size: '1.2MB', uploadedAt: '2024-01-18T08:45:00Z' }
+        ],
+        createdAt: '2024-01-18T08:00:00Z',
+        updatedAt: '2024-01-19T09:30:00Z',
+        expectedDelivery: '2024-07-31',
+        justification: 'Critical security requirement',
+        wbsCode: null,
+        aucCode: null,
+        poNumber: null
+    },
+    {
+        id: 'CAPEX-2024-010',
+        title: 'Boiler System Replacement',
+        description: 'Replacement of aging boiler system with energy-efficient alternative',
+        type: 'maintenance',
+        amount: 2200000,
+        currency: 'INR',
+        department: 'Maintenance',
+        plant: 'Plant B',
+        businessUnit: 'Manufacturing',
+        requesterId: 8,
+        requesterName: 'Jane Miller',
+        status: 'pending',
+        currentApprover: 'department_head',
+        approvalChain: [
+            { level: 'requester', userId: 8, userName: 'Jane Miller', status: 'approved', timestamp: '2024-01-20T14:00:00Z', comments: 'Request submitted' },
+            { level: 'department_head', userId: 9, userName: 'Tom Davis', status: 'pending', timestamp: null, comments: '' },
+            { level: 'plant_head', userId: 10, userName: 'Alex Chen', status: 'pending', timestamp: null, comments: '' },
+            { level: 'business_ceo', userId: 4, userName: 'Lisa Brown', status: 'pending', timestamp: null, comments: '' },
+            { level: 'cfo', userId: 5, userName: 'David Garcia', status: 'pending', timestamp: null, comments: '' }
+        ],
+        documents: [
+            { name: 'Boiler Specs.pdf', type: 'pdf', size: '3.1MB', uploadedAt: '2024-01-20T14:15:00Z' }
+        ],
+        createdAt: '2024-01-20T14:00:00Z',
+        updatedAt: '2024-01-20T14:00:00Z',
+        expectedDelivery: '2024-08-31',
+        justification: 'Aging equipment replacement',
         wbsCode: null,
         aucCode: null,
         poNumber: null

@@ -1,4 +1,4 @@
-# CapEx Automation Application
+# CapEx Portal Application
 
 A comprehensive Capital Expenditure automation application that digitizes the entire CapEx requisition process from form submission to final approval, with role-based access control and automated approval workflows.
 
@@ -134,24 +134,27 @@ The application includes comprehensive sample data:
 ### File Structure
 ```
 CapEx/
-├── index.html              # Login page with captcha
-├── dashboard.html          # Main dashboard
-├── request-form.html       # CapEx request form
-├── my-requests.html        # My requests list
-├── approval.html           # Approval interface
-├── reports.html            # Reports & analytics
+├── index.html                  # Login page
+├── dashboard.html              # Main dashboard with admin charts
+├── request-form.html            # Enhanced CapEx request form
+├── my-requests.html             # Tile-style request viewing
+├── approval.html                # Approval interface with comments
+├── reports.html                 # Reports & analytics
 ├── css/
-│   ├── main.css           # Core styles
-│   ├── components.css     # Component styles
-│   └── responsive.css     # Responsive design
+│   ├── main.css               # Core styles
+│   ├── components.css         # Component styles + tiles + admin
+│   └── responsive.css          # Responsive design
 ├── js/
-│   ├── app.js             # Main application logic
-│   ├── auth.js            # Authentication
-│   ├── workflow.js        # Approval workflow
-│   └── data.js            # Sample data
-└── assets/
-    └── images/
-        └── bg.png         # Background image for login
+│   ├── app.js                 # Main application logic
+│   ├── auth.js                # Authentication & session management
+│   ├── workflow.js            # Approval workflow
+│   ├── data.js                # Sample data (10+ requests)
+│   └── sync.js                # Data synchronization manager
+├── database/
+│   └── capex_database.sql     # Complete MySQL schema
+├── assets/
+│   └── images/                # Images and logos
+└── forms/                      # Reference PDF images
 ```
 
 ### Key Features
@@ -198,29 +201,48 @@ This application is developed for internal use. All rights reserved.
 
 ---
 
-**Version**: 1.1.0  
-**Last Updated**: January 2024  
-**Developer**: CapEx Automation Team
+**Version**: 2.0.0  
+**Last Updated**: April 2024  
+**Developer**: CapEx Portal Team
 
-## Recent Updates (v1.1.0)
+## Recent Updates (v2.0.0)
+
+### Major Enhancements
+- ✅ **Enhanced Request Form**: Complete form with all fields from real CapEx PDFs including:
+  - Location, Department, Financial Year, Date of Proposal
+  - Project Type selection (8 checkbox options)
+  - Economic Evaluation (Amount, Machinery, Installation, Payback)
+  - Support Attached (12 document type options)
+  - Project Timeline and Description
+- ✅ **Comment System**: Modal-based approve/reject with mandatory/optional comments
+- ✅ **Tile-Style UI**: Professional card-based request viewing with inline actions
+- ✅ **Admin Dashboard**: 4 chart types (Pie, Bar, Line, Doughnut) with Chart.js
+- ✅ **Data Synchronization**: Real-time sync across tabs and pages
+- ✅ **Sidebar Improvements**: Collapsible with three-line toggle, role-based visibility
 
 ### Security Enhancements
-- ✅ Added CAPTCHA verification on login page
-- ✅ Implemented case-insensitive captcha validation
-- ✅ Added refresh functionality for captcha
-
-### UI Improvements
-- ✅ Fixed login page background image display
-- ✅ Resolved icon overlapping with text in login fields
-- ✅ Applied dark theme to all form elements
-- ✅ Enhanced search and filter input styling
-- ✅ Improved form container backgrounds and borders
-
-### Bug Fixes
 - ✅ Removed unwanted "Changes you made may not be saved" warnings
-- ✅ Disabled error notification popups on page load
-- ✅ Cleaned up test files and unwanted code
+- ✅ CAPTCHA verification on login page
+- ✅ Session timeout management
+- ✅ Role-based access control
 
-### New Pages
-- ✅ Created standalone pages: request-form.html, my-requests.html, approval.html, reports.html
-- ✅ Integrated all pages with proper navigation
+### UI/UX Improvements
+- ✅ Dark theme applied throughout
+- ✅ Professional tile-style request cards
+- ✅ Smooth sidebar collapse/expand animations
+- ✅ Chart-based analytics for admin
+- ✅ Enhanced navigation with badges
+
+### Database Integration
+- ✅ Complete MySQL schema provided
+- ✅ All tables, views, stored procedures, triggers
+- ✅ DataSyncManager for localStorage synchronization
+- ✅ Ready for backend integration
+
+### New Features
+- ✅ 10 sample CapEx requests with full distribution
+- ✅ Complete approval chains with comments
+- ✅ Search and filter functionality
+- ✅ Export data functionality
+- ✅ Track approval chain inline
+- ✅ Profile and logout working across all pages

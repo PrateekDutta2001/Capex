@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CapEx Automation - Dashboard</title>
+    <title>CapEx Portal - Dashboard</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body class="dashboard-page">
     <div class="app-container">
@@ -16,9 +17,9 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <i class="fas fa-chart-line"></i>
-                    <span>CapEx Automation</span>
+                    <span>CapEx Portal</span>
                 </div>
-                <button class="sidebar-toggle" id="sidebarToggle">
+                <button class="sidebar-toggle" id="sidebarToggle" style="display: none;">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
@@ -66,12 +67,12 @@
                             <span>View Reports</span>
                         </a>
                     </li>
-                    <li class="nav-item" id="adminNav" style="display: none;">
+                    <!-- <li class="nav-item" id="adminNav" style="display: none;">
                         <a href="#admin" class="nav-link">
                             <i class="fas fa-cog"></i>
                             <span>Admin</span>
                         </a>
-                    </li>
+                    </li> -->
                 </ul>
             </div>
             
@@ -161,7 +162,7 @@
                                 <i class="fas fa-clock"></i>
                             </div>
                             <div class="stat-content">
-                                <div class="stat-number" id="pendingRequests">0</div>
+                                <div class="stat-number" id="pendingRequests">2</div>
                                 <div class="stat-label">Pending</div>
                             </div>
                         </div>
@@ -269,7 +270,7 @@
                                         <div class="step-icon">
                                             <i class="fas fa-crown"></i>
                                         </div>
-                                        <div class="step-label">CEO</div>
+                                        <div class="step-label">CFO</div>
                                     </div>
                                     <div class="workflow-arrow">
                                         <i class="fas fa-arrow-right"></i>
@@ -278,7 +279,7 @@
                                         <div class="step-icon">
                                                 <i class="fas fa-dollar-sign"></i>
                                         </div>
-                                        <div class="step-label">CFO</div>
+                                        <div class="step-label">CEO</div>
                                     </div>
                                 </div>
                             </div>
@@ -336,8 +337,490 @@
     </div>
     
     <script src="js/data.js"></script>
+    <script src="js/sync.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/workflow.js"></script>
     <script src="js/app.js"></script>
+    
+    <script>
+        // Initialize admin dashboard with graphs
+        function initializeAdminDashboard() {
+            const currentUser = authManager.getCurrentUser();
+            if (!currentUser || currentUser.role !== 'admin') return;
+            
+            // Update admin nav visibility
+            const adminNav = document.getElementById('adminNav');
+            if (adminNav) {
+                adminNav.style.display = 'block';
+            }
+            
+            // Create admin dashboard content
+            createAdminDashboard();
+        }
+        
+        function createAdminDashboard() {
+            const adminContent = document.getElementById('adminContent');
+            if (!adminContent) return;
+            
+            // Calculate statistics
+            const stats = calculateAdminStats();
+            
+            adminContent.innerHTML = `
+                <div class="admin-dashboard">
+                    <div class="admin-stats-grid">
+                        <div class="admin-stat-card">
+                            <h4>Total Requests</h4>
+                            <div class="admin-stat-value">${stats.totalRequests}</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <h4>Total Amount</h4>
+                            <div class="admin-stat-value">${formatCurrency(stats.totalAmount)}</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <h4>Pending</h4>
+                            <div class="admin-stat-value">${stats.pending}</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <h4>Approved</h4>
+                            <div class="admin-stat-value">${stats.approved}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-charts-grid">
+                        <div class="admin-chart-card">
+                            <h4>Requests by Status</h4>
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                        <div class="admin-chart-card">
+                            <h4>Requests by Type</h4>
+                            <canvas id="typeChart"></canvas>
+                        </div>
+                        <div class="admin-chart-card">
+                            <h4>Amount Trend</h4>
+                            <canvas id="amountChart"></canvas>
+                        </div>
+                        <div class="admin-chart-card">
+                            <h4>Department Distribution</h4>
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-action-buttons">
+                        <button class="btn btn-primary" onclick="exportAllData()">
+                            <i class="fas fa-download"></i> Export All Data
+                        </button>
+                        <button class="btn btn-secondary" onclick="refreshAdminData()">
+                            <i class="fas fa-sync"></i> Refresh Data
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Initialize charts
+            initializeCharts();
+        }
+        
+        function calculateAdminStats() {
+            return {
+                totalRequests: capexRequests.length,
+                totalAmount: capexRequests.reduce((sum, r) => sum + r.amount, 0),
+                pending: capexRequests.filter(r => r.status === 'pending' || r.status === 'in_progress').length,
+                approved: capexRequests.filter(r => r.status === 'approved').length,
+                rejected: capexRequests.filter(r => r.status === 'rejected').length
+            };
+        }
+        
+        function initializeCharts() {
+            // Status Chart (Pie)
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx) {
+                new Chart(statusCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Pending', 'Approved', 'Rejected', 'In Progress'],
+                        datasets: [{
+                            data: [
+                                capexRequests.filter(r => r.status === 'pending').length,
+                                capexRequests.filter(r => r.status === 'approved').length,
+                                capexRequests.filter(r => r.status === 'rejected').length,
+                                capexRequests.filter(r => r.status === 'in_progress').length
+                            ],
+                            backgroundColor: ['#f59e0b', '#10b981', '#ef4444', '#06b6d4']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Type Chart (Bar)
+            const typeCtx = document.getElementById('typeChart');
+            if (typeCtx) {
+                new Chart(typeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Revenue Growth', 'Maintenance'],
+                        datasets: [{
+                            label: 'Number of Requests',
+                            data: [
+                                capexRequests.filter(r => r.type === 'revenue_growth').length,
+                                capexRequests.filter(r => r.type === 'maintenance').length
+                            ],
+                            backgroundColor: ['#2563eb', '#8b5cf6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Amount Trend (Line)
+            const amountCtx = document.getElementById('amountChart');
+            if (amountCtx) {
+                // Group by month
+                const monthlyData = {};
+                capexRequests.forEach(r => {
+                    const month = new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    if (!monthlyData[month]) monthlyData[month] = 0;
+                    monthlyData[month] += r.amount / 100000; // Convert to lakhs
+                });
+                
+                new Chart(amountCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(monthlyData),
+                        datasets: [{
+                            label: 'Amount (Lakhs)',
+                            data: Object.values(monthlyData),
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Department Chart (Doughnut)
+            const deptCtx = document.getElementById('departmentChart');
+            if (deptCtx) {
+                const deptStats = {};
+                capexRequests.forEach(r => {
+                    if (!deptStats[r.department]) deptStats[r.department] = 0;
+                    deptStats[r.department]++;
+                });
+                
+                new Chart(deptCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(deptStats),
+                        datasets: [{
+                            data: Object.values(deptStats),
+                            backgroundColor: ['#2563eb', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        function exportAllData() {
+            const data = {
+                users: users,
+                capexRequests: capexRequests,
+                notifications: notifications,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `capex-all-data-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showMessage('All data exported successfully!', 'success');
+        }
+        
+        function refreshAdminData() {
+            createAdminDashboard();
+            showMessage('Data refreshed successfully!', 'success');
+        }
+        
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        // Load recent requests on dashboard
+        function loadRecentRequests() {
+            const recentRequestsContainer = document.getElementById('recentRequests');
+            if (!recentRequestsContainer) return;
+            
+            const myRequests = authManager.getMyRequests();
+            const recentRequests = myRequests.slice(0, 5).reverse(); // Show most recent first
+            
+            if (recentRequests.length === 0) {
+                recentRequestsContainer.innerHTML = `
+                    <div class="empty-state" style="text-align: center; padding: 2rem;">
+                        <i class="fas fa-file-alt" style="font-size: 2rem; color: #94a3b8; margin-bottom: 0.5rem;"></i>
+                        <p style="color: #94a3b8;">No recent requests</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            recentRequestsContainer.innerHTML = recentRequests.map(request => `
+                <div class="request-item" style="background: #1e293b; border: 1px solid #334155; border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <h4 style="color: #f8fafc; margin: 0; font-size: 0.875rem;">${request.title}</h4>
+                        <span class="status status-${request.status}" style="font-size: 0.75rem;">
+                            ${statusDefinitions[request.status]?.label || request.status}
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.75rem; color: #94a3b8;">
+                        <span><i class="fas fa-rupee-sign"></i> ${formatCurrency(request.amount)}</span>
+                        <span><i class="fas fa-calendar"></i> ${formatDate(request.createdAt)}</span>
+                        <span><i class="fas fa-tag"></i> ${capexTypes.find(t => t.id === request.type)?.name || request.type}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Load pending approvals on dashboard
+        function loadPendingApprovals() {
+            const pendingApprovalsContainer = document.getElementById('pendingApprovals');
+            if (!pendingApprovalsContainer) return;
+            
+            const currentUser = authManager.getCurrentUser();
+            if (!currentUser) return;
+            
+            // If user is a requester, show message that they have no approvals to do
+            if (currentUser.role === 'requester') {
+                pendingApprovalsContainer.innerHTML = `
+                    <div class="empty-state" style="text-align: center; padding: 2rem;">
+                        <i class="fas fa-info-circle" style="font-size: 2rem; color: #94a3b8; margin-bottom: 0.5rem;"></i>
+                        <p style="color: #94a3b8;">As a requester, you don't have any approvals to process.<br>Your pending requests appear in "Recent Requests" above.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const pendingApprovals = authManager.getPendingApprovals();
+            const recentApprovals = pendingApprovals.slice(0, 5).reverse();
+            
+            if (recentApprovals.length === 0) {
+                pendingApprovalsContainer.innerHTML = `
+                    <div class="empty-state" style="text-align: center; padding: 2rem;">
+                        <i class="fas fa-check-circle" style="font-size: 2rem; color: #94a3b8; margin-bottom: 0.5rem;"></i>
+                        <p style="color: #94a3b8;">No pending approvals</p>
+                        <p style="color: #64748b; font-size: 0.875rem; margin-top: 0.5rem;">All approvals are up to date</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            pendingApprovalsContainer.innerHTML = recentApprovals.map(request => `
+                <div class="approval-item" style="background: #1e293b; border: 1px solid #334155; border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <h4 style="color: #f8fafc; margin: 0; font-size: 0.875rem;">${request.title}</h4>
+                        <span class="status status-${request.status}" style="font-size: 0.75rem;">
+                            ${statusDefinitions[request.status]?.label || request.status}
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.5rem;">
+                        <span><i class="fas fa-user"></i> ${request.requesterName}</span>
+                        <span><i class="fas fa-rupee-sign"></i> ${formatCurrency(request.amount)}</span>
+                        <span><i class="fas fa-calendar"></i> ${formatDate(request.createdAt)}</span>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-sm btn-success" onclick="window.location.href='approval.html'">
+                            <i class="fas fa-check"></i> Review
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="viewRequestDetails('${request.id}')">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Update dashboard stats
+        function updateDashboardStats() {
+            const stats = authManager.getDashboardStats();
+            
+            const totalEl = document.getElementById('totalRequests');
+            if (totalEl) totalEl.textContent = stats.totalRequests;
+            
+            const pendingEl = document.getElementById('pendingRequests');
+            if (pendingEl) pendingEl.textContent = stats.pendingRequests;
+            
+            const approvedEl = document.getElementById('approvedRequests');
+            if (approvedEl) approvedEl.textContent = stats.approvedRequests;
+            
+            const rejectedEl = document.getElementById('rejectedRequests');
+            if (rejectedEl) rejectedEl.textContent = stats.rejectedRequests;
+        }
+        
+        function viewRequestDetails(requestId) {
+            const request = capexRequests.find(r => r.id === requestId);
+            if (!request) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal show';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 700px;">
+                    <div class="modal-header">
+                        <h3>${request.title}</h3>
+                        <button class="modal-close" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="request-details">
+                            <div class="detail-section">
+                                <h4>Basic Information</h4>
+                                <div class="detail-grid">
+                                    <div class="detail-item">
+                                        <label>Request ID:</label>
+                                        <span>${request.id}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Amount:</label>
+                                        <span>${formatCurrency(request.amount)}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Status:</label>
+                                        <span class="status status-${request.status}">
+                                            ${statusDefinitions[request.status]?.label}
+                                        </span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <label>Department:</label>
+                                        <span>${request.department}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h4>Description</h4>
+                                <p>${request.description || request.projectDescription || 'No description'}</p>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h4>Justification</h4>
+                                <p>${request.justification || 'No justification provided'}</p>
+                            </div>
+                            
+                            <div class="detail-section">
+                                <h4>Approval Status</h4>
+                                <div class="approval-chain">
+                                    ${request.approvalChain?.map((approval, index) => `
+                                        <div class="approval-step ${approval.status}" style="display: flex; align-items: center; gap: 1rem; padding: 0.75rem; margin-bottom: 0.5rem; border-left: 3px solid ${approval.status === 'approved' ? '#10b981' : approval.status === 'rejected' ? '#ef4444' : '#64748b'}; background: #1e293b; border-radius: 0.25rem;">
+                                            <i class="fas fa-${approval.status === 'approved' ? 'check-circle' : approval.status === 'rejected' ? 'times-circle' : 'clock'}" style="color: ${approval.status === 'approved' ? '#10b981' : approval.status === 'rejected' ? '#ef4444' : '#64748b'};"></i>
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: 600; color: #f8fafc;">${roleDefinitions[approval.level]?.label}</div>
+                                                <div style="color: #94a3b8; font-size: 0.875rem;">${approval.userName || 'Pending'}</div>
+                                                ${approval.comments ? `<div style="color: #cbd5e1; font-size: 0.75rem; margin-top: 0.25rem;">${approval.comments}</div>` : ''}
+                                            </div>
+                                        </div>
+                                    `).join('') || 'No approval chain'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        // Initialize everything on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // New Request button
+            const createRequestBtn = document.getElementById('createRequestBtn');
+            if (createRequestBtn) {
+                createRequestBtn.addEventListener('click', () => {
+                    window.location.href = 'request-form.html';
+                });
+            }
+            
+            // View Reports button
+            const viewReportsBtn = document.getElementById('viewReportsBtn');
+            if (viewReportsBtn) {
+                viewReportsBtn.addEventListener('click', () => {
+                    window.location.href = 'reports.html';
+                });
+            }
+            
+            // Manage Users button (Admin only)
+            const manageUsersBtn = document.getElementById('manageUsersBtn');
+            if (manageUsersBtn) {
+                manageUsersBtn.addEventListener('click', () => {
+                    const currentUser = authManager.getCurrentUser();
+                    if (currentUser && currentUser.role === 'admin') {
+                        showMessage('Admin features coming soon!', 'info');
+                    }
+                });
+            }
+            
+            // View All links
+            const viewAllLinks = document.querySelectorAll('.view-all');
+            viewAllLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    if (href === '#my-requests') {
+                        window.location.href = 'my-requests.html';
+                    } else if (href === '#pending-approvals') {
+                        window.location.href = 'approval.html';
+                    }
+                });
+            });
+            
+            // Load dashboard content
+            setTimeout(() => {
+                loadRecentRequests();
+                loadPendingApprovals();
+                updateDashboardStats();
+                initializeAdminDashboard();
+            }, 100);
+        });
+    </script>
 </body>
 </html>

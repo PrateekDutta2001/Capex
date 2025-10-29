@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CapEx Automation - Login</title>
+    <title>CapEx Portal - Login</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/responsive.css">
@@ -20,12 +20,15 @@
     </style>
 </head>
 <body class="login-page">
+    <div class="login-logo">
+        <img src="assets/images/logo-kpmg_white.png" alt="KPMG Logo">
+    </div>
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
                 <div class="logo">
                     <i class="fas fa-chart-line"></i>
-                    <h1>CapEx Automation</h1>
+                    <h1>CapEx Portal</h1>
                 </div>
                 <p class="subtitle">Capital Expenditure Management System</p>
             </div>
@@ -113,8 +116,9 @@
         </div>
     </div>
     
-    <script src="js/auth.js"></script>
     <script src="js/data.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/app.js"></script>
     
     <script>
@@ -139,10 +143,9 @@
         
         // Remove error notifications
         document.addEventListener('DOMContentLoaded', function() {
-            // Disable beforeunload warning
+            // Completely disable beforeunload warning
             window.addEventListener('beforeunload', function(e) {
-                e.preventDefault();
-                e.returnValue = '';
+                // Do nothing - this prevents the dialog from showing
             });
             
             // Override error handler
@@ -170,4 +173,3 @@
     </script>
 </body>
 </html>
-

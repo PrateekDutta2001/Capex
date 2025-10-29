@@ -1,4 +1,4 @@
-// Main Application JavaScript for CapEx Automation
+// Main Application JavaScript for CapEx Portal
 
 class CapExApp {
     constructor() {

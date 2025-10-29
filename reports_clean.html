@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapEx Portal - Reports</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="dashboard-page">
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span>CapEx Portal</span>
+                </div>
+                <button class="sidebar-toggle" id="sidebarToggle" style="display: none;">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name" id="userName">Loading...</div>
+                        <div class="user-role" id="userRole">Loading...</div>
+                    </div>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="dashboard.html" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="request-form.html" class="nav-link">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>New Request</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="my-requests.html" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>My Requests</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="pendingApprovalsNav">
+                        <a href="approval.html" class="nav-link">
+                            <i class="fas fa-clock"></i>
+                            <span>Pending Approvals</span>
+                            <span class="badge" id="pendingCount">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active" id="reportsNav">
+                        <a href="reports.html" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>View Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <button class="btn btn-secondary btn-sm" id="profileBtn">
+                    <i class="fas fa-user-cog"></i>
+                    Profile
+                </button>
+                <button class="btn btn-secondary" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h1 class="page-title">Reports & Analytics</h1>
+                </div>
+                <div class="header-right">
+                    <div class="user-menu">
+                        <button class="user-menu-btn" id="userMenuBtn">
+                            <div class="user-avatar-small">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <span id="userNameHeader">Loading...</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="dropdown-item" onclick="window.location.href='profile.html'">
+                                <i class="fas fa-user"></i>
+                                <span>Profile</span>
+                            </div>
+                            <div class="dropdown-item" onclick="window.location.href='settings.html'">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item" onclick="authManager.logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="reports-container">
+                    <!-- Reports Header -->
+                    <div class="reports-header">
+                        <div class="reports-title-section">
+                        <h2>CapEx Reports & Analytics</h2>
+                        <p>Comprehensive view of CapEx requests and approval metrics</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="exportData()">
+                            <i class="fas fa-download"></i> Export Data
+                        </button>
+                    </div>
+                    
+                    <!-- Stats Cards -->
+                    <div class="reports-stats-grid">
+                        <div class="reports-stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="totalRequestsReport">0</div>
+                                <div class="stat-label">Total Requests</div>
+                            </div>
+                        </div>
+                        <div class="reports-stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="pendingReport">0</div>
+                                <div class="stat-label">Pending</div>
+                            </div>
+                        </div>
+                        <div class="reports-stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="approvedReport">0</div>
+                                <div class="stat-label">Approved</div>
+                            </div>
+                        </div>
+                        <div class="reports-stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value" id="rejectedReport">0</div>
+                                <div class="stat-label">Rejected</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Grid -->
+                    <div class="reports-charts-grid">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-chart-pie"></i> Requests by Status</h3>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="statusChartReport"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-chart-bar"></i> Requests by Type</h3>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="typeChartReport"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-chart-line"></i> Amount Trend</h3>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="amountChartReport"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h3><i class="fas fa-chart-doughnut"></i> Department Distribution</h3>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="departmentChartReport"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Stats -->
+                    <div class="reports-details-grid">
+                        <div class="detail-card">
+                            <div class="detail-card-header">
+                                <h3><i class="fas fa-rupee-sign"></i> Financial Overview</h3>
+                            </div>
+                            <div class="detail-card-body">
+                                <div class="detail-item">
+                                    <span class="detail-label">Total Amount:</span>
+                                    <span class="detail-value" id="totalAmountReport">₹0</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Average Amount:</span>
+                                    <span class="detail-value" id="avgAmountReport">₹0</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Highest Amount:</span>
+                                    <span class="detail-value" id="highestAmountReport">₹0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-card">
+                            <div class="detail-card-header">
+                                <h3><i class="fas fa-briefcase"></i> Department Analysis</h3>
+                            </div>
+                            <div class="detail-card-body" id="departmentListReport">
+                                <!-- Department list will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/data.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/workflow.js"></script>
+    <script src="js/app.js"></script>
+    
+    <script>
+        // Check authentication
+        if (!authManager.isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
+        
+        // Update user interface
+        updateUserInterface();
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+        
+        // Initialize reports
+        function initializeReports() {
+            updateStatsCards();
+            initializeCharts();
+            populateDepartmentAnalysis();
+        }
+        
+        // Update stats cards
+        function updateStatsCards() {
+            const stats = {
+                total: capexRequests.length,
+                pending: capexRequests.filter(r => r.status === 'pending' || r.status === 'in_progress').length,
+                approved: capexRequests.filter(r => r.status === 'approved').length,
+                rejected: capexRequests.filter(r => r.status === 'rejected').length,
+                totalAmount: capexRequests.reduce((sum, r) => sum + r.amount, 0),
+                averageAmount: capexRequests.length > 0 ? capexRequests.reduce((sum, r) => sum + r.amount, 0) / capexRequests.length : 0,
+                highestAmount: capexRequests.length > 0 ? Math.max(...capexRequests.map(r => r.amount)) : 0
+            };
+            
+            // Update stat cards
+            document.getElementById('totalRequestsReport').textContent = stats.total;
+            document.getElementById('pendingReport').textContent = stats.pending;
+            document.getElementById('approvedReport').textContent = stats.approved;
+            document.getElementById('rejectedReport').textContent = stats.rejected;
+            
+            // Update financial overview
+            document.getElementById('totalAmountReport').textContent = formatCurrency(stats.totalAmount);
+            document.getElementById('avgAmountReport').textContent = formatCurrency(stats.averageAmount);
+            document.getElementById('highestAmountReport').textContent = formatCurrency(stats.highestAmount);
+        }
+        
+        // Initialize charts
+        function initializeCharts() {
+            const pending = capexRequests.filter(r => r.status === 'pending').length;
+            const inProgress = capexRequests.filter(r => r.status === 'in_progress').length;
+            const approved = capexRequests.filter(r => r.status === 'approved').length;
+            const rejected = capexRequests.filter(r => r.status === 'rejected').length;
+            
+            // Status Chart (Pie)
+            const statusCtx = document.getElementById('statusChartReport');
+            if (statusCtx) {
+                new Chart(statusCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Pending', 'In Progress', 'Approved', 'Rejected'],
+                        datasets: [{
+                            data: [pending, inProgress, approved, rejected],
+                            backgroundColor: [
+                                '#f59e0b',
+                                '#3b82f6',
+                                '#10b981',
+                                '#ef4444'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#1e293b'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#f8fafc',
+                                    padding: 15,
+                                    font: { size: 12 }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Type Chart (Bar)
+            const revenueGrowth = capexRequests.filter(r => r.type === 'revenue_growth').length;
+            const maintenance = capexRequests.filter(r => r.type === 'maintenance').length;
+            
+            const typeCtx = document.getElementById('typeChartReport');
+            if (typeCtx) {
+                new Chart(typeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Revenue Growth', 'Maintenance'],
+                        datasets: [{
+                            label: 'Requests',
+                            data: [revenueGrowth, maintenance],
+                            backgroundColor: ['#3b82f6', '#8b5cf6'],
+                            borderColor: ['#2563eb', '#7c3aed'],
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: '#94a3b8',
+                                    stepSize: 1
+                                },
+                                grid: {
+                                    color: '#334155'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#94a3b8'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Amount Trend Chart (Line)
+            const monthData = {};
+            capexRequests.forEach(req => {
+                const month = new Date(req.createdAt).toLocaleString('default', { month: 'short' });
+                if (!monthData[month]) {
+                    monthData[month] = 0;
+                }
+                monthData[month] += req.amount;
+            });
+            
+            const amountCtx = document.getElementById('amountChartReport');
+            if (amountCtx) {
+                new Chart(amountCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(monthData),
+                        datasets: [{
+                            label: 'Amount (₹)',
+                            data: Object.values(monthData),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: '#94a3b8',
+                                    callback: function(value) {
+                                        return '₹' + (value / 1000000).toFixed(1) + 'M';
+                                    }
+                                },
+                                grid: {
+                                    color: '#334155'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#94a3b8'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Department Chart (Doughnut)
+            const deptData = {};
+            capexRequests.forEach(req => {
+                if (!deptData[req.department]) {
+                    deptData[req.department] = 0;
+                }
+                deptData[req.department]++;
+            });
+            
+            const deptCtx = document.getElementById('departmentChartReport');
+            if (deptCtx) {
+                new Chart(deptCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(deptData),
+                        datasets: [{
+                            data: Object.values(deptData),
+                            backgroundColor: [
+                                '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b',
+                                '#10b981', '#ef4444', '#06b6d4', '#84cc16'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#1e293b'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#f8fafc',
+                                    padding: 10,
+                                    font: { size: 11 }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Populate department analysis
+        function populateDepartmentAnalysis() {
+            const deptData = {};
+            capexRequests.forEach(req => {
+                if (!deptData[req.department]) {
+                    deptData[req.department] = 0;
+                }
+                deptData[req.department]++;
+            });
+            
+            const container = document.getElementById('departmentListReport');
+            container.innerHTML = Object.entries(deptData)
+                .map(([dept, count]) => `
+                    <div class="detail-item">
+                        <span class="detail-label">${dept}:</span>
+                        <span class="detail-value">${count} request${count > 1 ? 's' : ''}</span>
+                    </div>
+                `).join('');
+        }
+        
+        // Export data
+        function exportData() {
+            const dataStr = JSON.stringify(capexRequests, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `capex-data-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showMessage('Data exported successfully!', 'success');
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initializeReports();
+            }, 100);
+        });
+        
+        
+    </script>
+</body>
+</html>
