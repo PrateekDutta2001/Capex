@@ -201,11 +201,11 @@ This application is developed for internal use. All rights reserved.
 
 ---
 
-**Version**: 2.0.0  
+**Version**: 2.1.0  
 **Last Updated**: April 2024  
 **Developer**: CapEx Portal Team
 
-## Recent Updates (v2.0.0)
+## Recent Updates (v2.1.0)
 
 ### Major Enhancements
 - ✅ **Enhanced Request Form**: Complete form with all fields from real CapEx PDFs including:
@@ -216,9 +216,12 @@ This application is developed for internal use. All rights reserved.
   - Project Timeline and Description
 - ✅ **Comment System**: Modal-based approve/reject with mandatory/optional comments
 - ✅ **Tile-Style UI**: Professional card-based request viewing with inline actions
+- ✅ **Modern Approval Interface**: Professional approval cards with search, filters, expandable details
 - ✅ **Admin Dashboard**: 4 chart types (Pie, Bar, Line, Doughnut) with Chart.js
+- ✅ **Reports Dashboard**: Professional analytics with 4 chart types and statistics
 - ✅ **Data Synchronization**: Real-time sync across tabs and pages
-- ✅ **Sidebar Improvements**: Collapsible with three-line toggle, role-based visibility
+- ✅ **Fixed Sidebar**: Non-collapsible for consistent navigation
+- ✅ **Dashboard Metrics**: Fixed to show correct stats for all user roles
 
 ### Security Enhancements
 - ✅ Removed unwanted "Changes you made may not be saved" warnings
@@ -229,9 +232,12 @@ This application is developed for internal use. All rights reserved.
 ### UI/UX Improvements
 - ✅ Dark theme applied throughout
 - ✅ Professional tile-style request cards
-- ✅ Smooth sidebar collapse/expand animations
-- ✅ Chart-based analytics for admin
+- ✅ Fixed sidebar (non-collapsible)
+- ✅ Chart-based analytics for admin and reports
 - ✅ Enhanced navigation with badges
+- ✅ Modern approval interface with urgency badges
+- ✅ Professional document cards
+- ✅ Gradient icon cards for statistics
 
 ### Database Integration
 - ✅ Complete MySQL schema provided
@@ -242,7 +248,11 @@ This application is developed for internal use. All rights reserved.
 ### New Features
 - ✅ 10 sample CapEx requests with full distribution
 - ✅ Complete approval chains with comments
-- ✅ Search and filter functionality
+- ✅ Search and filter functionality for approvals
 - ✅ Export data functionality
 - ✅ Track approval chain inline
 - ✅ Profile and logout working across all pages
+- ✅ Dashboard metrics fixed for all roles
+- ✅ Expandable approval details
+- ✅ Professional reports dashboard
+- ✅ Urgency badges for high-value requests
